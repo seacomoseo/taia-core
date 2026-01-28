@@ -4,34 +4,34 @@
  * Includes header slot, main content, and footer slot
  */
 import BaseLayout from './BaseLayout.astro'
-import SectionShell from '@components/SectionShell.astro'
-import type { JsonLd } from '@schemas/seo'
+import SectionShell from '../components/SectionShell.astro'
+import type { JsonLd } from '../schemas/seo'
 
 interface Props {
   // SEO
   title: string
   description: string
-  canonical?: string
-  image?: string
-  imageAlt?: string
-  type?: 'website' | 'article' | 'product'
-  noindex?: boolean
-  nofollow?: boolean
-  publishedTime?: string
-  modifiedTime?: string
-  author?: string
-  jsonLd?: JsonLd | JsonLd[]
-  alternates?: Array<{ hreflang: string; href: string }>
-  
+  canonical?: string | undefined
+  image?: string | undefined
+  imageAlt?: string | undefined
+  type?: 'website' | 'article' | 'product' | undefined
+  noindex?: boolean | undefined
+  nofollow?: boolean | undefined
+  publishedTime?: string | undefined
+  modifiedTime?: string | undefined
+  author?: string | undefined
+  jsonLd?: JsonLd | JsonLd[] | undefined
+  alternates?: Array<{ hreflang: string; href: string }> | undefined
+
   // Site config
-  locale?: string
-  siteName?: string
-  twitterHandle?: string
-  
+  locale?: string | undefined
+  siteName?: string | undefined
+  twitterHandle?: string | undefined
+
   // Layout options
-  contentSize?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
-  contentPadding?: 'none' | 'sm' | 'md' | 'lg'
-  showBreadcrumbs?: boolean
+  contentSize?: 'sm' | 'md' | 'lg' | 'xl' | 'full' | undefined
+  contentPadding?: 'none' | 'sm' | 'md' | 'lg' | undefined
+  showBreadcrumbs?: boolean | undefined
 }
 
 const {
@@ -76,26 +76,26 @@ const {
   twitterHandle={twitterHandle}
 >
   <slot name="head" slot="head" />
-  
+
   <slot name="header" />
-  
+
   <main id="main-content" class="page-main">
     {showBreadcrumbs && (
       <slot name="breadcrumbs" />
     )}
-    
-    <SectionShell 
-      as="div" 
-      size={contentSize} 
+
+    <SectionShell
+      as="div"
+      size={contentSize}
       padding={contentPadding}
       class="page-content"
     >
       <slot />
     </SectionShell>
   </main>
-  
+
   <slot name="footer" />
-  
+
   <slot name="footer-scripts" slot="footer-scripts" />
 </BaseLayout>
 

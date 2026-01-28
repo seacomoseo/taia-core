@@ -4,33 +4,33 @@
  * For blog posts, products, categories, etc.
  */
 import BaseLayout from './BaseLayout.astro'
-import SectionShell from '@components/SectionShell.astro'
-import type { JsonLd } from '@schemas/seo'
+import SectionShell from '../components/SectionShell.astro'
+import type { JsonLd } from '../schemas/seo'
 
 interface Props {
   // SEO
   title: string
   description: string
-  canonical?: string
-  image?: string
-  imageAlt?: string
-  noindex?: boolean
-  nofollow?: boolean
-  jsonLd?: JsonLd | JsonLd[]
-  alternates?: Array<{ hreflang: string; href: string }>
-  
+  canonical?: string | undefined
+  image?: string | undefined
+  imageAlt?: string | undefined
+  noindex?: boolean | undefined
+  nofollow?: boolean | undefined
+  jsonLd?: JsonLd | JsonLd[] | undefined
+  alternates?: Array<{ hreflang: string; href: string }> | undefined
+
   // Site config
-  locale?: string
-  siteName?: string
-  twitterHandle?: string
-  
+  locale?: string | undefined
+  siteName?: string | undefined
+  twitterHandle?: string | undefined
+
   // Collection options
-  collectionTitle?: string
-  totalItems?: number
-  currentPage?: number
-  totalPages?: number
-  prevPage?: string
-  nextPage?: string
+  collectionTitle?: string | undefined
+  totalItems?: number | undefined
+  currentPage?: number | undefined
+  totalPages?: number | undefined
+  prevPage?: string | undefined
+  nextPage?: string | undefined
 }
 
 const {
@@ -73,9 +73,9 @@ const showPagination = totalPages > 1
   twitterHandle={twitterHandle}
 >
   <slot name="head" slot="head" />
-  
+
   <slot name="header" />
-  
+
   <main id="main-content" class="collection-main">
     <SectionShell size="lg" padding="md">
       <!-- Collection Header -->
@@ -88,48 +88,52 @@ const showPagination = totalPages > 1
             {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </p>
         )}
-        
+
         <slot name="filters" />
       </header>
-      
+
       <!-- Collection Grid -->
       <div class="collection-grid">
         <slot />
       </div>
-      
+
       <!-- Pagination -->
       {showPagination && (
         <nav class="pagination" aria-label="Pagination">
-          {prevPage ? (
-            <a href={prevPage} class="pagination-link pagination-prev">
+          {prevPage
+            ? (
+              <a href={prevPage} class="pagination-link pagination-prev">
               ← Previous
-            </a>
-          ) : (
-            <span class="pagination-link pagination-prev pagination-disabled">
+              </a>
+            )
+            : (
+              <span class="pagination-link pagination-prev pagination-disabled">
               ← Previous
-            </span>
-          )}
-          
+              </span>
+            )}
+
           <span class="pagination-info">
             Page {currentPage} of {totalPages}
           </span>
-          
-          {nextPage ? (
-            <a href={nextPage} class="pagination-link pagination-next">
+
+          {nextPage
+            ? (
+              <a href={nextPage} class="pagination-link pagination-next">
               Next →
-            </a>
-          ) : (
-            <span class="pagination-link pagination-next pagination-disabled">
+              </a>
+            )
+            : (
+              <span class="pagination-link pagination-next pagination-disabled">
               Next →
-            </span>
-          )}
+              </span>
+            )}
         </nav>
       )}
     </SectionShell>
   </main>
-  
+
   <slot name="footer" />
-  
+
   <slot name="footer-scripts" slot="footer-scripts" />
 </BaseLayout>
 

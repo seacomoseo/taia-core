@@ -1,107 +1,107 @@
 # TAIA Core
 
-Reusable foundation for high-performance, SEO-optimized Astro websites.
+Fundación reutilizable para sitios web Astro de alto rendimiento y optimizados para SEO.
 
-## Features
+## Características
 
-- 🚀 **Performance-first**: Targets 100/100/100/100 Lighthouse scores
-- 🔍 **SEO-ready**: Complete meta tags, JSON-LD, sitemap support
-- ♿ **Accessible**: WCAG 2.1 AA compliant components
-- 📝 **Content validation**: Zod schemas for type-safe content
-- 🤖 **Agent-friendly**: Clear guardrails and documentation
+- 🚀 **Rendimiento primero**: Orientado a puntuaciones de 100/100/100/100 en Lighthouse.
+- 🔍 **Listo para SEO**: Meta tags completos, JSON-LD, soporte para sitemap.
+- ♿ **Accesible**: Componentes que cumplen con WCAG 2.1 AA.
+- 📝 **Validación de contenido**: Esquemas Zod para contenido con tipado seguro.
+- 🤖 **Amigable para agentes**: Guías y documentación claras para asistentes IA.
 
-## Installation
+## Instalación
 
-### As a submodule (recommended)
+### Como submódulo (recomendado)
 
 ```bash
-git submodule add https://github.com/your-org/taia-core.git vendor/taia-core
+git submodule add https://github.com/seacomoseo/taia-core.git vendor/taia-core
 ```
 
-### As npm package (future)
+### Como paquete npm (futuro)
 
 ```bash
 pnpm add taia-core
 ```
 
-## Components
+## Componentes
 
-| Component | Description |
-|-----------|-------------|
-| `SeoHead` | Complete SEO meta, OG, Twitter, JSON-LD |
-| `ResponsiveImage` | Optimized images with srcset |
-| `SmartLink` | Auto internal/external detection |
-| `SectionShell` | Consistent layout wrapper |
-| `SkipLink` | Accessibility skip navigation |
-| `FocusOutlines` | Keyboard focus styles |
+| Componente | Descripción |
+|------------|-------------|
+| `SeoHead` | Meta SEO completo, OG, Twitter, JSON-LD |
+| `ResponsiveImage` | Imágenes optimizadas con srcset |
+| `SmartLink` | Detección automática interno/externo |
+| `SectionShell` | Envoltorio de layout consistente |
+| `SkipLink` | Navegación de salto para accesibilidad |
+| `FocusOutlines` | Estilos de foco para teclado |
 
 ## Layouts
 
-| Layout | Use Case |
-|--------|----------|
-| `BaseLayout` | Root HTML shell |
-| `PageLayout` | Single pages |
-| `CollectionLayout` | Lists/archives with pagination |
+| Layout | Caso de Uso |
+|--------|-------------|
+| `BaseLayout` | Shell HTML raíz |
+| `PageLayout` | Páginas individuales |
+| `CollectionLayout` | Listados/archivos con paginación |
 
-## Schemas
+## Esquemas
 
-Zod schemas for content validation:
+Esquemas Zod para validación de contenido:
 
 ```typescript
 import { pageSchema, postSchema, productSchema } from 'taia-core/schemas'
 ```
 
-## CLI Tools
+## Herramientas CLI
 
 ```bash
-pnpm taia:validate          # Validate content against schemas
-pnpm taia:links             # Check for broken internal links
-pnpm taia:lighthouse <url>  # Run Lighthouse with budgets
+pnpm taia:validate          # Validar contenido contra esquemas
+pnpm taia:links             # Comprobar enlaces internos rotos
+pnpm taia:lighthouse <url>  # Ejecutar Lighthouse con budgets
 ```
 
-## Quality Gates
+## Puertas de Calidad
 
 ```bash
 pnpm lint          # ESLint (StandardJS + TypeScript)
-pnpm typecheck     # TypeScript check
-pnpm test          # Vitest tests
-pnpm build         # Build verification
+pnpm typecheck     # Verificación de TypeScript
+pnpm test          # Tests de Vitest
+pnpm build         # Verificación de construcción
 ```
 
-## Performance Targets
+## Objetivos de Rendimiento
 
-| Metric | Target |
-|--------|--------|
-| Performance | ≥ 90 |
-| Accessibility | 100 |
-| Best Practices | 100 |
+| Métrica | Objetivo |
+|---------|----------|
+| Rendimiento | ≥ 90 |
+| Accesibilidad | 100 |
+| Mejores Prácticas | 100 |
 | SEO | 100 |
 | LCP | ≤ 2.5s |
 | CLS | ≤ 0.1 |
 | TBT | ≤ 200ms |
 
-## Documentation
+## Documentación
 
-- [TAIA System](./docs/TAIA_SYSTEM.md) - Architecture overview
-- [SEO Rails](./docs/SEO_RAILS.md) - SEO guidelines
-- [Performance Rails](./docs/PERFORMANCE_RAILS.md) - Performance optimization
-- [Content Rails](./docs/CONTENT_RAILS.md) - Content structure
+- [Sistema TAIA](./docs/TAIA_SYSTEM.md) - Visión general de la arquitectura
+- [SEO Rails](./docs/SEO_RAILS.md) - Guías de SEO
+- [Performance Rails](./docs/PERFORMANCE_RAILS.md) - Optimización de rendimiento
+- [Content Rails](./docs/CONTENT_RAILS.md) - Estructura de contenido
 
-## Agent Skills
+## Habilidades del Agente
 
-Located in `.agent/skills/`:
+Ubicadas en `.agent/skills/`:
 
-| Skill | Purpose |
-|-------|---------|
-| `skill_project_intake` | Gather requirements |
-| `skill_brand_and_copy` | Brand and messaging |
-| `skill_seo_strategy` | Keyword research and URL architecture |
-| `skill_ux_review` | UX and accessibility audit |
-| `skill_performance_audit` | Lighthouse testing |
-| `skill_cms_schema_generator` | CMS configuration |
-| `skill_pr_workflow` | Pull request standards |
-| `skill_ecommerce_mvp` | E-commerce setup |
+| Habilidad | Propósito |
+|-----------|-----------|
+| `skill_project_intake` | Recopilar requisitos |
+| `skill_brand_and_copy` | Marca y mensajería |
+| `skill_seo_strategy` | Investigación de palabras clave y arquitectura de URLs |
+| `skill_ux_review` | Auditoría de UX y accesibilidad |
+| `skill_performance_audit` | Pruebas de Lighthouse |
+| `skill_cms_schema_generator` | Configuración del CMS |
+| `skill_pr_workflow` | Estándares de Pull Request |
+| `skill_ecommerce_mvp` | Configuración de e-commerce |
 
-## License
+## Licencia
 
 MIT

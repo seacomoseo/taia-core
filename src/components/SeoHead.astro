@@ -3,25 +3,25 @@
  * SeoHead - Complete SEO meta tags component
  * Handles title, meta, canonical, Open Graph, Twitter Cards, and JSON-LD
  */
-import type { SeoData, JsonLd } from '@schemas/seo'
+import type { JsonLd } from '../schemas/seo'
 
 interface Props {
   title: string
   description: string
-  canonical?: string
-  image?: string
-  imageAlt?: string
+  canonical?: string | undefined
+  image?: string | undefined
+  imageAlt?: string | undefined
   type?: 'website' | 'article' | 'product'
   locale?: string
-  siteName?: string
-  twitterHandle?: string
-  noindex?: boolean
-  nofollow?: boolean
-  publishedTime?: string
-  modifiedTime?: string
-  author?: string
-  jsonLd?: JsonLd | JsonLd[]
-  alternates?: Array<{ hreflang: string; href: string }>
+  siteName?: string | undefined
+  twitterHandle?: string | undefined
+  noindex?: boolean | undefined
+  nofollow?: boolean | undefined
+  publishedTime?: string | undefined
+  modifiedTime?: string | undefined
+  author?: string | undefined
+  jsonLd?: JsonLd | JsonLd[] | undefined
+  alternates?: Array<{ hreflang: string; href: string }> | undefined
 }
 
 const {
@@ -97,5 +97,5 @@ const jsonLdArray = jsonLd
 
 <!-- JSON-LD Structured Data -->
 {jsonLdArray.map(ld => (
-  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <script is:inline type="application/ld+json" set:html={JSON.stringify(ld)} />
 ))}

@@ -30,16 +30,12 @@ const {
 } = Astro.props
 
 // Generate srcset if not provided and src looks like a resizable path
-const generateSrcset = (baseSrc: string): string | undefined => {
+const generateSrcset = (_baseSrc: string): string | undefined => {
   // Only generate for local images without existing srcset
-  if (srcset || baseSrc.startsWith('http') || baseSrc.startsWith('data:')) {
+  if (srcset || _baseSrc.startsWith('http') || _baseSrc.startsWith('data:')) {
     return srcset
   }
-  
-  const widths = [320, 640, 768, 1024, 1280, 1536]
-  const ext = baseSrc.substring(baseSrc.lastIndexOf('.'))
-  const base = baseSrc.substring(0, baseSrc.lastIndexOf('.'))
-  
+
   // Return undefined - let build tool handle srcset generation
   // This is a placeholder for Astro Image optimization
   return undefined
