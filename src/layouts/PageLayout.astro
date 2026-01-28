@@ -1,0 +1,112 @@
+---
+/**
+ * PageLayout - Single page wrapper
+ * Includes header slot, main content, and footer slot
+ */
+import BaseLayout from './BaseLayout.astro'
+import SectionShell from '@components/SectionShell.astro'
+import type { JsonLd } from '@schemas/seo'
+
+interface Props {
+  // SEO
+  title: string
+  description: string
+  canonical?: string
+  image?: string
+  imageAlt?: string
+  type?: 'website' | 'article' | 'product'
+  noindex?: boolean
+  nofollow?: boolean
+  publishedTime?: string
+  modifiedTime?: string
+  author?: string
+  jsonLd?: JsonLd | JsonLd[]
+  alternates?: Array<{ hreflang: string; href: string }>
+  
+  // Site config
+  locale?: string
+  siteName?: string
+  twitterHandle?: string
+  
+  // Layout options
+  contentSize?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  contentPadding?: 'none' | 'sm' | 'md' | 'lg'
+  showBreadcrumbs?: boolean
+}
+
+const {
+  title,
+  description,
+  canonical,
+  image,
+  imageAlt,
+  type = 'website',
+  noindex = false,
+  nofollow = false,
+  publishedTime,
+  modifiedTime,
+  author,
+  jsonLd,
+  alternates,
+  locale = 'es',
+  siteName,
+  twitterHandle,
+  contentSize = 'lg',
+  contentPadding = 'md',
+  showBreadcrumbs = false
+} = Astro.props
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  image={image}
+  imageAlt={imageAlt}
+  type={type}
+  noindex={noindex}
+  nofollow={nofollow}
+  publishedTime={publishedTime}
+  modifiedTime={modifiedTime}
+  author={author}
+  jsonLd={jsonLd}
+  alternates={alternates}
+  locale={locale}
+  siteName={siteName}
+  twitterHandle={twitterHandle}
+>
+  <slot name="head" slot="head" />
+  
+  <slot name="header" />
+  
+  <main id="main-content" class="page-main">
+    {showBreadcrumbs && (
+      <slot name="breadcrumbs" />
+    )}
+    
+    <SectionShell 
+      as="div" 
+      size={contentSize} 
+      padding={contentPadding}
+      class="page-content"
+    >
+      <slot />
+    </SectionShell>
+  </main>
+  
+  <slot name="footer" />
+  
+  <slot name="footer-scripts" slot="footer-scripts" />
+</BaseLayout>
+
+<style>
+  .page-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-content {
+    flex: 1;
+  }
+</style>

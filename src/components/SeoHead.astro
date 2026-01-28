@@ -1,0 +1,101 @@
+---
+/**
+ * SeoHead - Complete SEO meta tags component
+ * Handles title, meta, canonical, Open Graph, Twitter Cards, and JSON-LD
+ */
+import type { SeoData, JsonLd } from '@schemas/seo'
+
+interface Props {
+  title: string
+  description: string
+  canonical?: string
+  image?: string
+  imageAlt?: string
+  type?: 'website' | 'article' | 'product'
+  locale?: string
+  siteName?: string
+  twitterHandle?: string
+  noindex?: boolean
+  nofollow?: boolean
+  publishedTime?: string
+  modifiedTime?: string
+  author?: string
+  jsonLd?: JsonLd | JsonLd[]
+  alternates?: Array<{ hreflang: string; href: string }>
+}
+
+const {
+  title,
+  description,
+  canonical = Astro.url.href,
+  image,
+  imageAlt = title,
+  type = 'website',
+  locale = 'es',
+  siteName,
+  twitterHandle,
+  noindex = false,
+  nofollow = false,
+  publishedTime,
+  modifiedTime,
+  author,
+  jsonLd,
+  alternates = []
+} = Astro.props
+
+const robotsContent = [
+  noindex ? 'noindex' : 'index',
+  nofollow ? 'nofollow' : 'follow'
+].join(', ')
+
+const jsonLdArray = jsonLd
+  ? Array.isArray(jsonLd) ? jsonLd : [jsonLd]
+  : []
+---
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+<meta name="robots" content={robotsContent} />
+<link rel="canonical" href={canonical} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:locale" content={locale} />
+{siteName && <meta property="og:site_name" content={siteName} />}
+{image && <meta property="og:image" content={image} />}
+{image && <meta property="og:image:alt" content={imageAlt} />}
+
+<!-- Article specific -->
+{type === 'article' && publishedTime && (
+  <meta property="article:published_time" content={publishedTime} />
+)}
+{type === 'article' && modifiedTime && (
+  <meta property="article:modified_time" content={modifiedTime} />
+)}
+{type === 'article' && author && (
+  <meta property="article:author" content={author} />
+)}
+
+<!-- Twitter -->
+<meta property="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+<meta property="twitter:url" content={canonical} />
+<meta property="twitter:title" content={title} />
+<meta property="twitter:description" content={description} />
+{image && <meta property="twitter:image" content={image} />}
+{image && <meta property="twitter:image:alt" content={imageAlt} />}
+{twitterHandle && <meta property="twitter:site" content={twitterHandle} />}
+
+<!-- Hreflang alternates -->
+{alternates.map(alt => (
+  <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+))}
+
+<!-- JSON-LD Structured Data -->
+{jsonLdArray.map(ld => (
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+))}

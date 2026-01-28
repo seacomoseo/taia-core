@@ -1,0 +1,232 @@
+---
+/**
+ * BaseLayout - Root HTML layout
+ * Minimal shell with SEO, accessibility, and performance optimizations
+ */
+import SeoHead from '@components/SeoHead.astro'
+import SkipLink from '@components/SkipLink.astro'
+import FocusOutlines from '@components/FocusOutlines.astro'
+import type { JsonLd } from '@schemas/seo'
+
+interface Props {
+  // SEO
+  title: string
+  description: string
+  canonical?: string
+  image?: string
+  imageAlt?: string
+  type?: 'website' | 'article' | 'product'
+  noindex?: boolean
+  nofollow?: boolean
+  publishedTime?: string
+  modifiedTime?: string
+  author?: string
+  jsonLd?: JsonLd | JsonLd[]
+  alternates?: Array<{ hreflang: string; href: string }>
+  
+  // Site config
+  locale?: string
+  siteName?: string
+  twitterHandle?: string
+  
+  // Layout options
+  class?: string
+}
+
+const {
+  title,
+  description,
+  canonical,
+  image,
+  imageAlt,
+  type = 'website',
+  noindex = false,
+  nofollow = false,
+  publishedTime,
+  modifiedTime,
+  author,
+  jsonLd,
+  alternates = [],
+  locale = 'es',
+  siteName = 'TAIA',
+  twitterHandle,
+  class: bodyClass
+} = Astro.props
+
+const htmlLang = locale.split('_')[0]
+---
+
+<!DOCTYPE html>
+<html lang={htmlLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    
+    <SeoHead
+      title={title}
+      description={description}
+      canonical={canonical}
+      image={image}
+      imageAlt={imageAlt}
+      type={type}
+      locale={locale}
+      siteName={siteName}
+      twitterHandle={twitterHandle}
+      noindex={noindex}
+      nofollow={nofollow}
+      publishedTime={publishedTime}
+      modifiedTime={modifiedTime}
+      author={author}
+      jsonLd={jsonLd}
+      alternates={alternates}
+    />
+    
+    <FocusOutlines />
+    
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <SkipLink />
+    
+    <slot />
+    
+    <slot name="footer-scripts" />
+  </body>
+</html>
+
+<style is:global>
+  /* CSS Reset - Modern Minimal */
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    -moz-tab-size: 4;
+    tab-size: 4;
+  }
+
+  body {
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--color-text, #1a1a1a);
+    background-color: var(--color-bg, #ffffff);
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    overflow-wrap: break-word;
+  }
+
+  a {
+    color: inherit;
+    text-decoration-skip-ink: auto;
+  }
+
+  /* CSS Custom Properties - Design Tokens */
+  :root {
+    /* Colors */
+    --color-text: #1a1a1a;
+    --color-text-muted: #6b7280;
+    --color-text-on-dark: #ffffff;
+    --color-text-on-accent: #ffffff;
+    
+    --color-bg: #ffffff;
+    --color-bg-alt: #f9fafb;
+    --color-bg-dark: #1a1a1a;
+    
+    --color-accent: #3b82f6;
+    --color-accent-hover: #2563eb;
+    --color-focus: #3b82f6;
+    
+    --color-border: #e5e7eb;
+    --color-border-strong: #d1d5db;
+    
+    /* Typography */
+    --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+    
+    /* Spacing */
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2rem;
+    --space-2xl: 3rem;
+    --space-3xl: 4rem;
+    
+    /* Border radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 1rem;
+    --radius-full: 9999px;
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-base: 200ms ease;
+    --transition-slow: 300ms ease;
+  }
+
+  /* Dark mode */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-text: #f9fafb;
+      --color-text-muted: #9ca3af;
+      --color-bg: #111827;
+      --color-bg-alt: #1f2937;
+      --color-border: #374151;
+      --color-border-strong: #4b5563;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>

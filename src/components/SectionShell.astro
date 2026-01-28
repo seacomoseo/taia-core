@@ -1,0 +1,131 @@
+---
+/**
+ * SectionShell - Consistent layout wrapper for page sections
+ * Provides responsive padding, max-width, and semantic structure
+ */
+interface Props {
+  as?: 'section' | 'article' | 'div' | 'aside' | 'main' | 'header' | 'footer'
+  id?: string
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full'
+  padding?: 'none' | 'sm' | 'md' | 'lg'
+  background?: 'default' | 'alt' | 'dark' | 'accent'
+  class?: string
+  'aria-labelledby'?: string
+  'aria-label'?: string
+}
+
+const {
+  as: Element = 'section',
+  id,
+  size = 'lg',
+  padding = 'md',
+  background = 'default',
+  class: className,
+  'aria-labelledby': ariaLabelledby,
+  'aria-label': ariaLabel
+} = Astro.props
+
+const classes = [
+  'section-shell',
+  `section-shell--size-${size}`,
+  `section-shell--padding-${padding}`,
+  `section-shell--bg-${background}`,
+  className
+].filter(Boolean).join(' ')
+---
+
+<Element
+  id={id}
+  class={classes}
+  aria-labelledby={ariaLabelledby}
+  aria-label={ariaLabel}
+>
+  <div class="section-shell__inner">
+    <slot />
+  </div>
+</Element>
+
+<style>
+  .section-shell {
+    width: 100%;
+  }
+
+  .section-shell__inner {
+    width: 100%;
+    margin-inline: auto;
+  }
+
+  /* Size variants */
+  .section-shell--size-sm .section-shell__inner {
+    max-width: 40rem;
+  }
+
+  .section-shell--size-md .section-shell__inner {
+    max-width: 48rem;
+  }
+
+  .section-shell--size-lg .section-shell__inner {
+    max-width: 64rem;
+  }
+
+  .section-shell--size-xl .section-shell__inner {
+    max-width: 80rem;
+  }
+
+  .section-shell--size-full .section-shell__inner {
+    max-width: none;
+  }
+
+  /* Padding variants */
+  .section-shell--padding-none {
+    padding-block: 0;
+  }
+
+  .section-shell--padding-sm {
+    padding-block: 1.5rem;
+    padding-inline: 1rem;
+  }
+
+  .section-shell--padding-md {
+    padding-block: 3rem;
+    padding-inline: 1.5rem;
+  }
+
+  .section-shell--padding-lg {
+    padding-block: 5rem;
+    padding-inline: 2rem;
+  }
+
+  /* Background variants */
+  .section-shell--bg-default {
+    background-color: var(--color-bg, #ffffff);
+  }
+
+  .section-shell--bg-alt {
+    background-color: var(--color-bg-alt, #f5f5f5);
+  }
+
+  .section-shell--bg-dark {
+    background-color: var(--color-bg-dark, #1a1a1a);
+    color: var(--color-text-on-dark, #ffffff);
+  }
+
+  .section-shell--bg-accent {
+    background-color: var(--color-accent, #3b82f6);
+    color: var(--color-text-on-accent, #ffffff);
+  }
+
+  @media (min-width: 768px) {
+    .section-shell--padding-sm {
+      padding-inline: 2rem;
+    }
+
+    .section-shell--padding-md {
+      padding-inline: 3rem;
+    }
+
+    .section-shell--padding-lg {
+      padding-inline: 4rem;
+    }
+  }
+</style>

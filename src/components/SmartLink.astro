@@ -1,0 +1,102 @@
+---
+/**
+ * SmartLink - Intelligent link component
+ * Auto-detects internal/external, handles rel attributes, prefetch control
+ */
+interface Props {
+  href: string
+  rel?: string
+  target?: string
+  prefetch?: boolean | 'hover' | 'viewport' | 'load'
+  class?: string
+  'aria-label'?: string
+  'aria-current'?: string | boolean
+}
+
+const {
+  href,
+  rel: customRel,
+  target: customTarget,
+  prefetch = true,
+  class: className,
+  'aria-label': ariaLabel,
+  'aria-current': ariaCurrent
+} = Astro.props
+
+// Determine if link is external
+const isExternal = href.startsWith('http') || href.startsWith('//')
+const isMailto = href.startsWith('mailto:')
+const isTel = href.startsWith('tel:')
+const isAnchor = href.startsWith('#')
+const isDownload = href.includes('/downloads/') || href.endsWith('.pdf') || href.endsWith('.zip')
+
+// Compute target
+const target = customTarget ?? (isExternal ? '_blank' : undefined)
+
+// Compute rel
+const computeRel = (): string | undefined => {
+  if (customRel) return customRel
+  
+  const rels: string[] = []
+  
+  if (isExternal) {
+    rels.push('noopener', 'noreferrer')
+  }
+  
+  if (isDownload) {
+    rels.push('nofollow')
+  }
+  
+  return rels.length > 0 ? rels.join(' ') : undefined
+}
+
+const rel = computeRel()
+
+// Compute prefetch strategy
+const computePrefetch = (): string | undefined => {
+  if (!prefetch || isExternal || isMailto || isTel || isAnchor) {
+    return undefined
+  }
+  
+  if (prefetch === true) {
+    return 'hover'
+  }
+  
+  return prefetch
+}
+
+const prefetchValue = computePrefetch()
+
+// Check if current page
+const currentPath = Astro.url.pathname
+const isCurrentPage = !isExternal && href === currentPath
+---
+
+<a
+  href={href}
+  rel={rel}
+  target={target}
+  class={className}
+  aria-label={ariaLabel}
+  aria-current={ariaCurrent ?? (isCurrentPage ? 'page' : undefined)}
+  data-astro-prefetch={prefetchValue}
+>
+  <slot />
+  {isExternal && (
+    <span class="sr-only">(opens in new tab)</span>
+  )}
+</a>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>

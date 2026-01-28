@@ -1,0 +1,205 @@
+---
+/**
+ * CollectionLayout - List/archive page layout
+ * For blog posts, products, categories, etc.
+ */
+import BaseLayout from './BaseLayout.astro'
+import SectionShell from '@components/SectionShell.astro'
+import type { JsonLd } from '@schemas/seo'
+
+interface Props {
+  // SEO
+  title: string
+  description: string
+  canonical?: string
+  image?: string
+  imageAlt?: string
+  noindex?: boolean
+  nofollow?: boolean
+  jsonLd?: JsonLd | JsonLd[]
+  alternates?: Array<{ hreflang: string; href: string }>
+  
+  // Site config
+  locale?: string
+  siteName?: string
+  twitterHandle?: string
+  
+  // Collection options
+  collectionTitle?: string
+  totalItems?: number
+  currentPage?: number
+  totalPages?: number
+  prevPage?: string
+  nextPage?: string
+}
+
+const {
+  title,
+  description,
+  canonical,
+  image,
+  imageAlt,
+  noindex = false,
+  nofollow = false,
+  jsonLd,
+  alternates,
+  locale = 'es',
+  siteName,
+  twitterHandle,
+  collectionTitle,
+  totalItems,
+  currentPage = 1,
+  totalPages = 1,
+  prevPage,
+  nextPage
+} = Astro.props
+
+const showPagination = totalPages > 1
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  image={image}
+  imageAlt={imageAlt}
+  type="website"
+  noindex={noindex}
+  nofollow={nofollow}
+  jsonLd={jsonLd}
+  alternates={alternates}
+  locale={locale}
+  siteName={siteName}
+  twitterHandle={twitterHandle}
+>
+  <slot name="head" slot="head" />
+  
+  <slot name="header" />
+  
+  <main id="main-content" class="collection-main">
+    <SectionShell size="lg" padding="md">
+      <!-- Collection Header -->
+      <header class="collection-header">
+        {collectionTitle && (
+          <h1 class="collection-title">{collectionTitle}</h1>
+        )}
+        {totalItems !== undefined && (
+          <p class="collection-count">
+            {totalItems} {totalItems === 1 ? 'item' : 'items'}
+          </p>
+        )}
+        
+        <slot name="filters" />
+      </header>
+      
+      <!-- Collection Grid -->
+      <div class="collection-grid">
+        <slot />
+      </div>
+      
+      <!-- Pagination -->
+      {showPagination && (
+        <nav class="pagination" aria-label="Pagination">
+          {prevPage ? (
+            <a href={prevPage} class="pagination-link pagination-prev">
+              ← Previous
+            </a>
+          ) : (
+            <span class="pagination-link pagination-prev pagination-disabled">
+              ← Previous
+            </span>
+          )}
+          
+          <span class="pagination-info">
+            Page {currentPage} of {totalPages}
+          </span>
+          
+          {nextPage ? (
+            <a href={nextPage} class="pagination-link pagination-next">
+              Next →
+            </a>
+          ) : (
+            <span class="pagination-link pagination-next pagination-disabled">
+              Next →
+            </span>
+          )}
+        </nav>
+      )}
+    </SectionShell>
+  </main>
+  
+  <slot name="footer" />
+  
+  <slot name="footer-scripts" slot="footer-scripts" />
+</BaseLayout>
+
+<style>
+  .collection-main {
+    flex: 1;
+  }
+
+  .collection-header {
+    margin-bottom: var(--space-xl);
+    text-align: center;
+  }
+
+  .collection-title {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: var(--space-sm);
+  }
+
+  .collection-count {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+
+  .collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg);
+    margin-bottom: var(--space-2xl);
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-lg);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .pagination-link {
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color var(--transition-fast);
+  }
+
+  .pagination-link:not(.pagination-disabled):hover {
+    background-color: var(--color-bg-alt);
+  }
+
+  .pagination-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .pagination-info {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+  }
+
+  @media (min-width: 768px) {
+    .collection-title {
+      font-size: 2.5rem;
+    }
+
+    .collection-grid {
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+  }
+</style>
