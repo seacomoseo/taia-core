@@ -10,7 +10,7 @@ interface Props {
   prefetch?: boolean | 'hover' | 'viewport' | 'load'
   class?: string
   'aria-label'?: string
-  'aria-current'?: string | boolean
+  'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time' | 'true' | 'false' | boolean | undefined | null
 }
 
 const {
@@ -36,17 +36,17 @@ const target = customTarget ?? (isExternal ? '_blank' : undefined)
 // Compute rel
 const computeRel = (): string | undefined => {
   if (customRel) return customRel
-  
+
   const rels: string[] = []
-  
+
   if (isExternal) {
     rels.push('noopener', 'noreferrer')
   }
-  
+
   if (isDownload) {
     rels.push('nofollow')
   }
-  
+
   return rels.length > 0 ? rels.join(' ') : undefined
 }
 
@@ -57,11 +57,11 @@ const computePrefetch = (): string | undefined => {
   if (!prefetch || isExternal || isMailto || isTel || isAnchor) {
     return undefined
   }
-  
+
   if (prefetch === true) {
     return 'hover'
   }
-  
+
   return prefetch
 }
 
