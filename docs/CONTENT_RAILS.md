@@ -143,8 +143,6 @@ template: default
 seo:
   title: About Our Company | Brand Name
   description: Learn about our mission, team, and values.
-showInNav: true
-menuOrder: 2
 ```
 
 ### Posts Collection
@@ -161,8 +159,8 @@ categories:
 tags:
   - web-vitals
   - optimization
-featuredImage: /images/blog/speed-optimization.jpg
-featuredImageAlt: Graph showing website speed improvements
+image: /images/blog/speed-optimization.jpg
+imageAlt: Graph showing website speed improvements
 seo:
   title: Website Speed Optimization Guide | Blog
   description: Proven techniques to improve your website's loading time and Core Web Vitals.
@@ -179,9 +177,9 @@ compareAtPrice: 249.99
 currency: EUR
 category: widgets
 images:
-  - src: /images/products/widget-pro-1.jpg
+  - src: /uploads/products/widget-pro-1.jpg
     alt: Premium Widget Pro front view
-  - src: /images/products/widget-pro-2.jpg
+  - src: /uploads/products/widget-pro-2.jpg
     alt: Premium Widget Pro features closeup
 inStock: true
 featured: true
@@ -205,3 +203,8 @@ Before publishing any content:
 - [ ] No spelling or grammar errors
 - [ ] Mobile preview looks good
 - [ ] Related content is linked
+
+## Related Skills
+
+- `skill_brand_identity` - Brand brief, tone of voice, personas, messaging
+- `skill_ux_review` - Page structure, hierarchy, CTAs, accessibility review

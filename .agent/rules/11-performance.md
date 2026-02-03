@@ -44,3 +44,7 @@ pnpm taia:lighthouse http://localhost:4321
 ```
 
 Fails if any budget is exceeded.
+
+## Related Skills
+
+- `skill_performance_audit` - Full performance analysis and optimization

@@ -44,3 +44,7 @@ Optional for MVP:
 - `inStock` boolean
 - `quantity` for actual tracking
 - Prevent checkout of out-of-stock items
+
+## Related Skills
+
+- `skill_ecommerce_mvp` - Full e-commerce setup guide

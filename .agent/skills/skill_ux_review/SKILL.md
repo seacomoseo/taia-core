@@ -53,7 +53,7 @@ For each key page, analyze:
 
 ### Step 2: Create Report
 
-Output to `/_taia/ux/review-report.md`:
+Output to `/_context/ux/review-report.md`:
 
 ```markdown
 # UX Review Report
@@ -122,7 +122,7 @@ If fixes are straightforward:
 
 ## Outputs
 
-1. `/_taia/ux/review-report.md` - Full analysis
+1. `/_context/ux/review-report.md` - Full analysis
 2. PR with fixes (if applicable)
 
 ## Definition of Done

@@ -31,17 +31,30 @@ pnpm taia:lighthouse <url>  # Performance audit
 - [Performance Rails](./docs/PERFORMANCE_RAILS.md) - Speed optimization
 - [Content Rails](./docs/CONTENT_RAILS.md) - Content guidelines
 
+## Content Model
+
+- `content/settings.yml` defines collections, singles, icons and singular labels
+- `content/<collection>/_index.<lang>.md` provides `path` (children prefix) and `slug` (collection page)
+- `content/singles/_home.<lang>.md` defines the homepage
+- CMS fields use `i18n: true` for translatable content and `i18n: 'duplicate'` for technical fields
+
 ## Agent Rules
 
-See `.agent/rules/` for detailed rules on:
-- Global standards (`00-global.md`)
-- SEO (`10-seo.md`)
-- Performance (`11-performance.md`)
-- Accessibility (`12-accessibility.md`)
-- E-commerce (`20-ecommerce.md`)
-- CMS (`30-cms.md`)
-- PR Workflow (`40-pr-workflow.md`)
+See `.agent/rules/` for detailed guidelines:
+- `00-global.md` - Standards & Context directory `/_context/`
+- `10-seo.md` - Technical SEO & Social Meta
+- `11-performance.md` - Budgets & Vitals
+- `12-accessibility.md` - WCAG 2.1 AA
+- `21-marketing.md` - Tracking, Ads & Local
+- `50-skills.md` - Full Agency Workflow
 
-## Skills
+## Skills: The Agency Workflow
 
-See `.agent/skills/` for specialized tasks.
+See `.agent/skills/` for the step-by-step process:
+
+1.  **Discovery**: `Project Intake` (Inmediate context digestion), `Competitive Analysis`.
+2.  **Strategy**: `SWOT Analysis (DAFO)`, `Marketing Strategy`, `SEO Strategy`.
+3.  **Branding**: `Brand Identity` (Full identity & copy manual).
+4.  **Execution**: `CMS Schema Generator`, `E-commerce MVP`, `PR Workflow`.
+5.  **Audit**: `Performance Audit`, `UX Review`.
+6.  **Wow**: `Delivery Presenter` (The premium strategic summary).

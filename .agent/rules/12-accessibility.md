@@ -39,3 +39,7 @@ All sites must meet WCAG 2.1 Level AA.
 - [ ] Color not only indicator
 - [ ] Screen reader tested
 - [ ] Touch targets ≥44px
+
+## Related Skills
+
+- `skill_ux_review` - Full UX and accessibility audit

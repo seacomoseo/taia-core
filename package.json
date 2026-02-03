@@ -6,6 +6,7 @@
   "exports": {
     "./components/*": "./src/components/*",
     "./layouts/*": "./src/layouts/*",
+    "./integration": "./src/integration/taia-core.ts",
     "./schemas": "./src/schemas/index.ts",
     "./schemas/*": "./src/schemas/*",
     "./utils/*": "./src/utils/*"
@@ -25,10 +26,17 @@
   },
   "dependencies": {
     "astro": "^5.1.0",
+    "js-yaml": "^4.1.1",
+    "mime-types": "^3.0.2",
+    "png-to-ico": "^2.1.8",
+    "sharp": "^0.33.5",
+    "yaml": "^2.8.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/mime-types": "^3.0.1",
     "@types/node": "^22.10.5",
     "@typescript-eslint/eslint-plugin": "^8.19.1",
     "@typescript-eslint/parser": "^8.19.1",

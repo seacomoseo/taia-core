@@ -214,3 +214,7 @@ pnpm taia:lighthouse http://localhost:4321
 - [ ] Total page weight < 1MB
 - [ ] Lighthouse Performance ≥ 90
 - [ ] Core Web Vitals pass
+
+## Related Skills
+
+- `skill_performance_audit` - Full performance analysis with Lighthouse and optimization recommendations

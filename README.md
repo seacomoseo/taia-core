@@ -10,18 +10,10 @@ Fundación reutilizable para sitios web Astro de alto rendimiento y optimizados 
 - 📝 **Validación de contenido**: Esquemas Zod para contenido con tipado seguro.
 - 🤖 **Amigable para agentes**: Guías y documentación claras para asistentes IA.
 
-## Instalación
-
-### Como submódulo (recomendado)
+## Instalación como submódulo
 
 ```bash
-git submodule add https://github.com/seacomoseo/taia-core.git vendor/taia-core
-```
-
-### Como paquete npm (futuro)
-
-```bash
-pnpm add taia-core
+git submodule add https://github.com/seacomoseo/taia-core.git core
 ```
 
 ## Componentes
@@ -59,6 +51,14 @@ pnpm taia:links             # Comprobar enlaces internos rotos
 pnpm taia:lighthouse <url>  # Ejecutar Lighthouse con budgets
 ```
 
+## Content Model
+
+- `content/settings.yml` define colecciones, singles, iconos y singular
+- `content/<collection>/_index.<lang>.md` usa `path` (prefijo hijos) y `slug` (landing)
+- `content/singles/_home.<lang>.md` define la home
+- Config CMS dinámico en `/admin/config.yml`
+- Campos traducibles usan `i18n: true` y técnicos `i18n: 'duplicate'`
+
 ## Puertas de Calidad
 
 ```bash
@@ -94,7 +94,7 @@ Ubicadas en `.agent/skills/`:
 | Habilidad | Propósito |
 |-----------|-----------|
 | `skill_project_intake` | Recopilar requisitos |
-| `skill_brand_and_copy` | Marca y mensajería |
+| `skill_brand_identity` | Marca y mensajería |
 | `skill_seo_strategy` | Investigación de palabras clave y arquitectura de URLs |
 | `skill_ux_review` | Auditoría de UX y accesibilidad |
 | `skill_performance_audit` | Pruebas de Lighthouse |

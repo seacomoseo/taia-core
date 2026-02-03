@@ -7,6 +7,7 @@
 
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { ConfigService } from '../services/config-service'
 
 interface Link {
   href: string
@@ -98,7 +99,7 @@ function buildValidPaths (srcDir: string, publicDir: string): Set<string> {
   // Add root path
   paths.add('/')
 
-  // Add pages from src/pages
+  // Add pages from Astro routes
   const pagesDir = path.join(srcDir, 'pages')
   if (fs.existsSync(pagesDir)) {
     const pageFiles = findFiles(pagesDir, ['.astro', '.md', '.mdx'])
@@ -120,21 +121,55 @@ function buildValidPaths (srcDir: string, publicDir: string): Set<string> {
 
   // Add content collections
   const contentDir = path.join(srcDir, 'content')
-  if (fs.existsSync(contentDir)) {
-    const collections = fs.readdirSync(contentDir, { withFileTypes: true })
+  const configService = new ConfigService(process.cwd())
+  const taiaConfig = configService.getTaiaConfig()
+  const defaultLang = configService.getDefaultLanguage()
+  const languages = taiaConfig.languages
 
-    for (const collection of collections) {
-      if (collection.isDirectory()) {
-        const collectionFiles = findFiles(
-          path.join(contentDir, collection.name),
-          ['.md', '.mdx', '.json', '.yaml', '.yml']
-        )
+  const addPath = (pathValue: string) => {
+    if (!pathValue.endsWith('/')) pathValue += '/'
+    paths.add(pathValue)
+  }
 
-        for (const file of collectionFiles) {
-          const slug = path.basename(file).replace(/\.(md|mdx|json|yaml|yml)$/, '')
-          paths.add(`/${collection.name}/${slug}/`)
-        }
+  for (const collection of taiaConfig.collections) {
+    const collectionDir = path.join(contentDir, collection.id)
+    if (!fs.existsSync(collectionDir)) continue
+
+    const collectionFiles = findFiles(
+      collectionDir,
+      ['.md', '.mdx', '.json', '.yaml', '.yml']
+    )
+
+    for (const file of collectionFiles) {
+      const rawSlug = path.basename(file).replace(/\.(md|mdx|json|yaml|yml)$/, '')
+      const match = rawSlug.match(/^(.*)\.([a-zA-Z-]+)$/)
+      const matchLang = match?.[2]
+      const hasLang = matchLang ? languages.includes(matchLang) : false
+      const lang = hasLang ? matchLang : defaultLang
+      const slug = hasLang ? (match?.[1] || rawSlug) : rawSlug
+
+      if (slug === '_index') {
+        const slugValue = configService.getCollectionSlug(collection, lang)
+        const langPrefix = lang === defaultLang ? '' : `/${lang}`
+        addPath(`${langPrefix}/${slugValue}`.replace(/\/+$/, '/') || '/')
+        continue
       }
+
+      const prefix = configService.getCollectionPrefix(collection, lang)
+      const langPrefix = lang === defaultLang ? '' : `/${lang}`
+      const fullPath = [langPrefix, prefix, slug].filter(Boolean).join('/')
+      addPath(`/${fullPath}`)
+    }
+  }
+
+  for (const single of taiaConfig.singles) {
+    for (const lang of languages) {
+      const filePath = path.join(contentDir, 'singles', `${single.id}.${lang}.md`)
+      if (!fs.existsSync(filePath)) continue
+      const slug = configService.getSingleSlug(single, lang)
+      const langPrefix = lang === defaultLang ? '' : `/${lang}`
+      const fullPath = [langPrefix, slug].filter(Boolean).join('/')
+      addPath(fullPath ? `/${fullPath}` : '/')
     }
   }
 
@@ -197,7 +232,7 @@ function isValidPath (href: string, validPaths: Set<string>): boolean {
 
 function main () {
   const baseDir = process.argv[2] || '.'
-  const srcDir = path.join(baseDir, 'src')
+  const srcDir = baseDir
   const publicDir = path.join(baseDir, 'public')
 
   console.log('🔗 TAIA Link Checker')

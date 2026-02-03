@@ -5,31 +5,48 @@ description: Gather client requirements through structured questions and checkli
 
 # Project Intake Skill
 
-Generate and manage project requirements gathering.
+Generate and manage project requirements gathering, including context ingestion and cleanup.
 
 ## When to Use
 
-- Starting a new project
-- Client provides incomplete brief
-- Need to identify gaps in requirements
+- Starting a new project.
+- Client provides raw materials in `/_context/_init/`.
+- Need to identify and fill gaps in project requirements.
 
 ## Inputs
 
-1. **Client Brief** (optional): Any existing information about the project
-2. **Project Type**: website, e-commerce, blog, landing page
+1. **Client Brief**: Any existing information about the project.
+2. **Initial Context**: A directory `/_context/_init/` containing raw files, notes, or branding.
+3. **Project Type**: website, e-commerce, blog, landing page.
 
 ## Process
 
-### Step 1: Analyze Existing Information
+### Step 1: Raw Context Ingestion
 
-Review any provided brief and identify:
-- What information is complete
-- What information is missing
-- What needs clarification
+If the `/_context/_init/` directory exists, analyze every file to build a comprehensive base:
+- **Scan** the `/_context/_init/` directory.
+- **Read** text files, notes, and extract information from structured documents.
+- **Identify** gaps: What is here? What is missing? (Branding? SWOT? USP?).
+- **Summarize** findings in `/_context/intake/raw-context-summary.md`.
 
-### Step 2: Generate Questions
+### Step 2: Cleanup & Reorganization
 
-Create questions in `/_taia/intake/questions.md`:
+Once the information has been ingested and summarized:
+- **Move** useful assets (like logos or confirmed photos) to their respective folders (e.g., `/_context/brand/logos/`).
+- **Archive or Delete** redundant, temporary or excessively heavy files from `/_context/_init/` that do not contribute to the final project.
+- **Goal**: Leave the project structure clean and focused on action items.
+
+### Step 3: Analyze Information Gaps
+
+Compare the raw context with the requirements for a high-performance, agency-grade site.
+- Is there a clear USP?
+- Is there an audience profile?
+- Are there SEO keywords?
+- Is there a visual style?
+
+### Step 4: Generate Targeted Questions
+
+Create questions in `/_context/intake/questions.md`:
 
 ```markdown
 # Project Intake Questions
@@ -70,7 +87,7 @@ Create questions in `/_taia/intake/questions.md`:
 
 ### Step 3: Create Asset Checklist
 
-Create `/_taia/intake/assets-needed.md`:
+Create `/_context/intake/assets-needed.md`:
 
 ```markdown
 # Assets Needed
@@ -103,14 +120,16 @@ Create `/_taia/intake/assets-needed.md`:
 
 ## Outputs
 
-1. `/_taia/intake/questions.md` - Prioritized questions
-2. `/_taia/intake/assets-needed.md` - Asset checklist
-3. `/_taia/intake/brief-summary.md` - Summary of known info
+1. `/_context/intake/raw-context-summary.md` - Analysis of provided materials.
+2. `/_context/intake/questions.md` - Prioritized questions.
+3. `/_context/intake/assets-needed.md` - Asset checklist.
+4. `/_context/intake/brief-summary.md` - Consolidated project brief.
 
 ## Definition of Done
 
-- [ ] All critical questions identified
-- [ ] Questions organized by priority
-- [ ] Asset checklist complete
-- [ ] Summary of current knowledge written
-- [ ] Next steps defined
+- [ ] All files in `/_context/_init/` processed.
+- [ ] Initialization folder cleaned or reorganized as appropriate.
+- [ ] Information gaps clearly identified.
+- [ ] Critical questions prioritized for client.
+- [ ] Asset checklist reflects missing raw materials.
+- [ ] Brief summary provides a solid foundation for Strategy skills.

@@ -6,6 +6,7 @@
 import SeoHead from '../components/SeoHead.astro'
 import SkipLink from '../components/SkipLink.astro'
 import FocusOutlines from '../components/FocusOutlines.astro'
+import { ConfigService } from '../services/config-service'
 import type { JsonLd } from '../schemas/seo'
 
 interface Props {
@@ -28,6 +29,7 @@ interface Props {
   locale?: string | undefined
   siteName?: string | undefined
   twitterHandle?: string | undefined
+  ga4Id?: string | undefined
 
   // Layout options
   class?: string | undefined
@@ -50,10 +52,17 @@ const {
   locale = 'es',
   siteName = 'TAIA',
   twitterHandle,
+  ga4Id,
   class: bodyClass
 } = Astro.props
 
 const htmlLang = locale.split('_')[0]
+const configService = new ConfigService(process.cwd())
+const taiaConfig = configService.getTaiaConfig()
+const resolvedGa4Id = ga4Id || taiaConfig.ga4Id
+const resolvedSiteName = siteName || taiaConfig.siteName || 'TAIA'
+const faviconSource = taiaConfig.faviconSource || ''
+const hasSvgFavicon = faviconSource.endsWith('.svg')
 ---
 
 <!DOCTYPE html>
@@ -68,8 +77,9 @@ const htmlLang = locale.split('_')[0]
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" sizes="any" href="/favicon.ico" />
+    {hasSvgFavicon && <link rel="icon" type="image/svg+xml" href="/favicon.svg" />}
+    <link rel="icon apple-touch-icon" type="image/png" sizes="192x192" href="/favicon.png" />
     <link rel="manifest" href="/site.webmanifest" />
 
     <SeoHead
@@ -80,7 +90,7 @@ const htmlLang = locale.split('_')[0]
       imageAlt={imageAlt}
       type={type}
       locale={locale}
-      siteName={siteName}
+      siteName={resolvedSiteName}
       twitterHandle={twitterHandle}
       noindex={noindex}
       nofollow={nofollow}
@@ -230,3 +240,15 @@ const htmlLang = locale.split('_')[0]
     }
   }
 </style>
+    {resolvedGa4Id && (
+      <script async src={`https://www.googletagmanager.com/gtag/js?id=${resolvedGa4Id}`}></script>
+    )}
+    {resolvedGa4Id && (
+      <script
+        is:inline
+        set:html={`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${resolvedGa4Id}');`}
+      />
+    )}

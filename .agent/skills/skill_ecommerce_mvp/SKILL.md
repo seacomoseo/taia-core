@@ -56,7 +56,7 @@ export const productSchema = z.object({
 
 ### Step 2: Create Sample Products
 
-Create in `src/content/products/`:
+Create in `content/products/`:
 
 ```yaml
 # product-name.md
@@ -67,7 +67,7 @@ description: Product description for listing pages.
 price: 29.99
 currency: EUR
 images:
-  - src: /images/products/product-1.jpg
+  - src: /uploads/products/product-1.jpg
     alt: Product front view
 inStock: true
 category: category-slug

@@ -5,8 +5,10 @@
 ### Style
 - **StandardJS**: No semicolons, 2 spaces indentation, single quotes
 - **TypeScript**: Strict mode, explicit types for exports
-- **Language**: All code, comments, and variables in English
-- **Naming**: camelCase for variables/functions, PascalCase for components/types
+- **Language**: All code and internal documentation in English.
+- **User Artifacts**: All artifacts (`task.md`, `implementation_plan.md`, `walkthrough.md`) MUST be in Spanish.
+- **Deliverables**: All client-facing outputs in `/_context/` MUST be in Spanish by default.
+- **Naming**: camelCase for variables/functions, PascalCase for components/types.
 
 ### File Organization
 ```
@@ -57,3 +59,29 @@ All changes must pass:
 - Prefer built-in APIs over libraries
 - Any new dependency requires justification
 - Keep bundle size minimal
+
+## TAIA Outputs Directory
+
+All strategic documents and client assets live in `/_context/`:
+
+```
+/_context/
+├── _init/        # Raw client context (Ingestion ONLY. Cleaned after processing)
+├── intake/       # Project requirements & brief
+├── competitive/  # Competitor analysis
+├── strategy/     # SWOT, Positioning, Main Goals
+├── brand/        # Brand assets & Logo proposals
+├── marketing/    # Marketing strategy
+├── seo/          # SEO planning
+├── ads/          # Paid ads strategy
+├── perf/         # Performance audits
+├── ux/           # UX reviews
+└── delivery/     # Final summary presentation
+```
+
+## Skills
+
+Use specialized skills for complex tasks:
+- See `.agent/skills/` for available skills
+- See `.agent/rules/50-skills.md` for usage guide
+- Always read SKILL.md before executing

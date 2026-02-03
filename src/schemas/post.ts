@@ -15,8 +15,8 @@ export const postSchema = z.object({
   seo: seoSchema,
 
   // Media
-  featuredImage: z.string().optional(),
-  featuredImageAlt: z.string().optional(),
+  image: z.string().optional(),
+  imageAlt: z.string().optional(),
 
   // Taxonomy
   categories: z.array(z.string()).optional().default([]),

@@ -120,7 +120,7 @@ function findContentFiles (dir: string): ContentFile[] {
 }
 
 function main () {
-  const contentDir = process.argv[2] || './src/content'
+  const contentDir = process.argv[2] || './content'
 
   console.log('🔍 TAIA Content Validator')
   console.log(`   Scanning: ${path.resolve(contentDir)}\n`)

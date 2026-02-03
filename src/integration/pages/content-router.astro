@@ -1,0 +1,192 @@
+---
+import { getCollection, render } from 'astro:content'
+import { ConfigService } from '../../services/config-service'
+
+export const prerender = false
+
+const configService = new ConfigService(process.cwd())
+const taiaConfig = configService.getTaiaConfig()
+const defaultLang = configService.getDefaultLanguage()
+const languages = taiaConfig.languages
+
+const splitSlug = (slug?: string) => {
+  if (!slug) return { base: '', lang: defaultLang }
+  const match = slug.match(/^(.*)\.([a-zA-Z-]+)$/)
+  const matchLang = match?.[2]
+  const hasLang = !!matchLang && languages.includes(matchLang)
+  const lang = hasLang ? (matchLang as string) : defaultLang
+  const base = hasLang ? (match?.[1] || slug) : slug
+  return { base, lang }
+}
+
+const getEntryLang = (item: any) => {
+  const filePath = typeof item.filePath === 'string' ? item.filePath : ''
+  const match = filePath.match(/\.([a-zA-Z-]+)\.mdx?$/)
+  if (match && languages.includes(match[1])) return match[1]
+  const { lang } = splitSlug(item.id || item.slug)
+  return lang
+}
+
+const matchesLang = (item: any, targetLang: string) => {
+  const filePath = typeof item.filePath === 'string' ? item.filePath : ''
+  if (filePath.endsWith(`.${targetLang}.md`) || filePath.endsWith(`.${targetLang}.mdx`)) return true
+  return getEntryLang(item) === targetLang
+}
+
+const slugify = (value: string) => {
+  return value
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+const getEntryBase = (item: any) => {
+  const { base } = splitSlug(item.id || item.slug)
+  if (base === '_index') return base
+
+  const rawSlug = typeof item.data?.slug === 'string' ? item.data.slug.trim() : ''
+  if (rawSlug && rawSlug !== '/') return rawSlug
+  if ((rawSlug === '' || rawSlug === '/') && (base === 'home' || base === '_home')) return 'home'
+
+  const title = typeof item.data?.title === 'string' ? item.data.title.trim() : ''
+  if (title) return slugify(title)
+
+  const filePath = typeof item.filePath === 'string' ? item.filePath : ''
+  const fileMatch = filePath.match(/\/([^/]+)\.([a-zA-Z-]+)\.mdx?$/)
+  if (fileMatch) return fileMatch[1]
+  return base
+}
+
+const findEntryByBase = (entries: any[], targetBase: string, targetLang: string) => {
+  return entries.find((item: any) => {
+    const entryLang = matchesLang(item, targetLang)
+    const entryBase = getEntryBase(item)
+    return entryLang && entryBase === targetBase
+  })
+}
+
+const matchesSegments = (segments: string[], target: string[]) => {
+  if (segments.length !== target.length) return false
+  return segments.every((segment, index) => segment === target[index])
+}
+
+const rawPath = Astro.params.path
+const segments = typeof rawPath === 'string' ? rawPath.split('/').filter(Boolean) : []
+let lang = defaultLang
+
+if (segments[0] && languages.includes(segments[0]) && segments[0] !== defaultLang) {
+  lang = segments.shift() as string
+}
+
+const singlesEntries = await getCollection('singles')
+const collectionEntries = new Map<string, any[]>()
+
+const getEntries = async (id: string) => {
+  if (collectionEntries.has(id)) return collectionEntries.get(id) as any[]
+  const entries = await getCollection(id as any)
+  collectionEntries.set(id, entries)
+  return entries
+}
+
+let entry: any
+let template: string | undefined
+let type: 'collection' | 'single' = 'collection'
+
+if (segments.length === 0) {
+  entry = findEntryByBase(singlesEntries, 'home', lang) || findEntryByBase(singlesEntries, '_home', lang)
+  if (entry) {
+    const singleConfig = taiaConfig.singles.find((item) => item.id.replace(/^_/, '') === 'home')
+    template = singleConfig?.template || 'default'
+    type = 'single'
+  }
+}
+
+for (const single of taiaConfig.singles) {
+  const normalizedSingleId = single.id.replace(/^_/, '')
+  const singleSlug = configService.getSingleSlug(single, lang)
+  const target = singleSlug ? singleSlug.split('/').filter(Boolean) : []
+  if (!matchesSegments(segments, target)) continue
+
+  if (singleSlug) {
+    entry = findEntryByBase(singlesEntries, singleSlug, lang)
+  } else {
+    entry = findEntryByBase(singlesEntries, normalizedSingleId, lang) || findEntryByBase(singlesEntries, `_${normalizedSingleId}`, lang)
+  }
+
+  if (entry) {
+    template = single.template
+    type = 'single'
+    break
+  }
+}
+
+if (!entry) {
+  const slugValue = segments.join('/')
+  if (slugValue === '') {
+    entry = findEntryByBase(singlesEntries, 'home', lang) || findEntryByBase(singlesEntries, '_home', lang)
+  } else {
+    entry = findEntryByBase(singlesEntries, slugValue, lang)
+  }
+
+  if (entry) {
+    const { base } = splitSlug(entry.id || entry.slug)
+    const normalizedBase = base.replace(/^_/, '')
+    const singleConfig = taiaConfig.singles.find((item) => item.id.replace(/^_/, '') === normalizedBase)
+    template = singleConfig?.template || 'default'
+    type = 'single'
+  }
+}
+
+if (!entry) {
+  for (const col of taiaConfig.collections) {
+    const entries = await getEntries(col.id)
+    const landingSlug = configService.getCollectionSlug(col, lang)
+    const landingSegments = landingSlug ? landingSlug.split('/').filter(Boolean) : []
+
+    if (matchesSegments(segments, landingSegments)) {
+      entry = findEntryByBase(entries, '_index', lang)
+      if (entry) {
+        template = col.template
+        type = 'collection'
+        break
+      }
+    }
+
+    const prefix = configService.getCollectionPrefix(col, lang)
+    const prefixSegments = prefix ? prefix.split('/').filter(Boolean) : []
+    const matchesPrefix = matchesSegments(segments.slice(0, prefixSegments.length), prefixSegments)
+    if (!matchesPrefix) continue
+
+    const remaining = segments.slice(prefixSegments.length)
+    if (remaining.length === 0) continue
+
+    const slugValue = remaining.join('/')
+    entry = findEntryByBase(entries, slugValue, lang)
+    if (entry) {
+      template = col.template
+      type = 'collection'
+      break
+    }
+  }
+}
+
+if (!entry) {
+  return new Response('Not found', { status: 404 })
+}
+
+const { Content } = await render(entry)
+
+const templates = import.meta.glob('/templates/*.astro', { eager: true }) as Record<string, { default: any }>
+const templateName = template || 'default'
+const TemplateComponent = templates[`/templates/${templateName}.astro`]?.default || templates['/templates/default.astro']?.default
+
+if (!TemplateComponent) {
+  throw new Error(`Template ${templateName} not found used in ${type}`)
+}
+---
+
+<TemplateComponent entry={entry} lang={lang}>
+  <Content />
+</TemplateComponent>

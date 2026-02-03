@@ -28,7 +28,16 @@ Standard collections:
 - `posts` - Blog articles
 - `products` - E-commerce items
 - `categories` - Taxonomy
+- `singles` - Individual pages (home, legal, etc.)
+- `templates` - Astro templates (code widget)
+- `components` - Astro components (code widget)
+- `i18n` - Translatable strings per language
 - `settings` - Site config
+
+Templates and components must use `widget: code` with `output_code_only: true` (no `default_language`).
+Use `i18n: true` on translatable fields when CMS is configured with multiple locales.
+Use `i18n: 'duplicate'` for technical fields (ids, prices, booleans, relations).
+Collections and singles should expose `singular` and `icon` metadata in settings.
 
 ### Step 2: Generate Zod Schema
 
@@ -66,7 +75,7 @@ Map Zod types to CMS widgets:
 
 ### Step 4: Create config.yml
 
-Output to `public/admin/config.yml`:
+Output to `/admin/config.yml` (served dynamically):
 
 ```yaml
 backend:
@@ -80,7 +89,7 @@ public_folder: /images
 collections:
   - name: pages
     label: Pages
-    folder: src/content/pages
+    folder: content/pages
     create: true
     slug: "{{slug}}"
     fields:
@@ -98,7 +107,7 @@ collections:
 
   - name: posts
     label: Blog Posts
-    folder: src/content/posts
+    folder: content/posts
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
@@ -106,7 +115,7 @@ collections:
       - { name: slug, label: Slug, widget: string }
       - { name: publishedAt, label: Published, widget: datetime }
       - { name: excerpt, label: Excerpt, widget: text }
-      - { name: featuredImage, label: Image, widget: image, required: false }
+      - { name: image, label: Image, widget: image, required: false }
       - { name: body, label: Body, widget: markdown }
       - name: categories
         label: Categories
@@ -125,7 +134,7 @@ collections:
 
   - name: products
     label: Products
-    folder: src/content/products
+    folder: content/products
     create: true
     slug: "{{slug}}"
     fields:
@@ -153,7 +162,7 @@ collections:
 
   - name: categories
     label: Categories
-    folder: src/content/categories
+    folder: content/categories
     create: true
     slug: "{{slug}}"
     fields:
@@ -173,8 +182,8 @@ After generating:
 ## Outputs
 
 1. `src/schemas/*.ts` - Zod schema files
-2. `public/admin/config.yml` - CMS configuration
-3. `public/admin/index.html` - CMS entry point
+2. `/admin/config.yml` - CMS configuration (dynamic)
+3. `/admin` - CMS entry point
 
 ## Definition of Done
 

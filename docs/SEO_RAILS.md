@@ -180,3 +180,8 @@ Custom 404 page must:
 - [ ] No broken internal links
 - [ ] All images have alt text
 - [ ] Heading structure is correct
+
+## Related Skills
+
+- `skill_seo_strategy` - Keyword research, URL architecture, content planning
+- `skill_local_seo` - Google Business Profile, NAP, citations, reviews

@@ -2,37 +2,33 @@
 
 ## Vision
 
-TAIA (Technical AI Agency) is an agentic web development system designed for:
-
-1. **High Performance**: PageSpeed 100/100/100/100 as the default
-2. **SEO Excellence**: Every page optimized for search from day one
-3. **Accessibility First**: WCAG 2.1 AA compliance built-in
-4. **Agent-Friendly**: Clear guardrails that let AI agents make confident changes
-5. **Cost-Effective**: Built on free tiers (Cloudflare Pages, Workers)
+TAIA (Technical AI Agency) is an agentic system designed to act as a full-service partner:
+1.  **Strategic Onboarding**: Digest raw client context (notes, PDFs, fragments) and fill strategic gaps.
+2.  **Market Intelligence**: Automatic competitive analysis and SWOT (DAFO) generation.
+3.  **Brand Identity**: Crafting professional voice, tone, and visual directions from scratch.
+4.  **High-Performance Delivery**: PageSpeed 100/100/100/100 and SEO excellence as the default foundation.
+5.  **Premium Presentation**: Delivering not just code, but a high-impact strategic summary that highlights project value.
 
 ## Architecture
 
 ```
-taia-core/               # Reusable foundation
-├── src/
-│   ├── components/      # Primitive components (SeoHead, ResponsiveImage, etc.)
-│   ├── layouts/         # Base layouts (BaseLayout, PageLayout, CollectionLayout)
-│   ├── schemas/         # Zod schemas for content validation
-│   ├── scripts/         # CLI tools (validate, link-checker, lighthouse)
-│   └── utils/           # Shared utilities
-├── docs/                # Agent documentation and rails
-└── .agent/              # Antigravity configuration
-    ├── rules/           # Repository rules
-    └── skills/          # Specialized agent skills
-
-taia-pilot/              # Demo project
-├── vendor/taia-core/    # Git submodule
-├── src/
-│   ├── content/         # CMS-editable content
-│   ├── pages/           # Astro pages
-│   └── lib/             # Project-specific code
-├── functions/           # Cloudflare Workers
-└── public/admin/        # Sveltia CMS
+taia-pilot/          # Demo project
+│── content/         # CMS-editable content
+│── components/      # Project components
+│── templates/       # Astro templates
+│── uploads/         # CMS uploads
+├── public/          # Build-time assets (favicons)
+└── core/            # Reusable foundation like git submodule (from github.com/seacomoseo/taia-core)
+    ├── src/
+    │   ├── components/  # Primitive components (SeoHead, ResponsiveImage, etc.)
+    │   ├── layouts/     # Base layouts (BaseLayout, PageLayout, CollectionLayout)
+    │   ├── schemas/     # Zod schemas for content validation
+    │   ├── scripts/     # CLI tools (validate, link-checker, lighthouse)
+    │   └── utils/       # Shared utilities
+    ├── docs/            # Agent documentation and rails
+    └── .agent/          # Antigravity configuration
+        ├── rules/       # Repository rules
+        └── skills/      # Specialized agent skills
 ```
 
 ## Core Principles
@@ -47,6 +43,7 @@ taia-pilot/              # Demo project
 - Minimum SEO fields enforced (title < 60 chars, description < 160 chars)
 - Products require at least one image
 - No broken internal links allowed
+- CMS fields must mark i18n content (`i18n: true`) and technical fields (`i18n: 'duplicate'`)
 
 ### 3. Performance Budget
 | Metric | Target |
@@ -121,3 +118,26 @@ Projects consuming taia-core can:
 - [SEO Rails](./SEO_RAILS.md) - SEO best practices and requirements
 - [Performance Rails](./PERFORMANCE_RAILS.md) - Performance optimization guide
 - [Content Rails](./CONTENT_RAILS.md) - Content guidelines and structure
+
+## Agent Configuration
+
+### Rules
+See `.agent/rules/` for mandatory guidelines:
+- `00-global.md` - Code standards and workflow
+- `10-seo.md` - SEO requirements
+- `11-performance.md` - Performance budgets
+- `12-accessibility.md` - WCAG compliance
+- `20-ecommerce.md` - E-commerce standards
+- `21-marketing.md` - Marketing and tracking
+- `30-cms.md` - CMS configuration
+- `40-pr-workflow.md` - PR process
+- `50-skills.md` - Skills usage guide
+
+### Skills
+See `.agent/skills/` for specialized tasks:
+- **Discovery**: Project Intake (Context ingestion), Competitive Analysis.
+- **Strategy**: SWOT Analysis (DAFO), Marketing Strategy, SEO Strategy, Local SEO, Paid Ads.
+- **Identity**: Brand Identity (Manuals & Voice).
+- **Development**: CMS Schema Generator, E-commerce MVP.
+- **Quality**: Performance Audit, UX Review.
+- **Delivery**: Delivery Presenter (The "Wow" moment), PR Workflow, Skill Manager.

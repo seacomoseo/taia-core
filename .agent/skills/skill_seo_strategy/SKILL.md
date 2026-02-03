@@ -34,7 +34,7 @@ Without external tools, use heuristic approach:
 3. Add location modifiers if local
 4. Consider long-tail variations
 
-Output to `/_taia/seo/keywords.md`:
+Output to `/_context/seo/keywords.md`:
 
 ```markdown
 # Keyword Research
@@ -60,7 +60,7 @@ Output to `/_taia/seo/keywords.md`:
 
 Design logical site structure:
 
-Output to `/_taia/seo/site-structure.md`:
+Output to `/_context/seo/site-structure.md`:
 
 ```markdown
 # Site Structure
@@ -90,7 +90,7 @@ Output to `/_taia/seo/site-structure.md`:
 
 ### Step 3: Content Plan
 
-Output to `/_taia/seo/content-plan.md`:
+Output to `/_context/seo/content-plan.md`:
 
 ```markdown
 # Content Plan
@@ -129,7 +129,7 @@ Output to `/_taia/seo/content-plan.md`:
 
 ### Step 4: Internal Linking Strategy
 
-Output to `/_taia/seo/internal-linking.md`:
+Output to `/_context/seo/internal-linking.md`:
 
 ```markdown
 # Internal Linking Strategy
@@ -156,10 +156,10 @@ Home → Hub Pages → Individual Pages
 
 ## Outputs
 
-1. `/_taia/seo/keywords.md`
-2. `/_taia/seo/site-structure.md`
-3. `/_taia/seo/content-plan.md`
-4. `/_taia/seo/internal-linking.md`
+1. `/_context/seo/keywords.md`
+2. `/_context/seo/site-structure.md`
+3. `/_context/seo/content-plan.md`
+4. `/_context/seo/internal-linking.md`
 
 ## Definition of Done
 

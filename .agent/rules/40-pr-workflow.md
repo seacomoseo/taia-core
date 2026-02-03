@@ -59,3 +59,7 @@ Brief description of changes.
 1. Delete feature branch
 2. Verify deploy succeeded
 3. Smoke test production
+
+## Related Skills
+
+- `skill_pr_workflow` - Detailed PR workflow with full checklists

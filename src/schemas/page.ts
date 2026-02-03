@@ -24,8 +24,6 @@ export const pageSchema = z.object({
   updatedAt: z.coerce.date().optional(),
 
   // Navigation
-  menuOrder: z.number().int().optional(),
-  showInNav: z.boolean().optional().default(true),
   parent: z.string().optional()
 })
 

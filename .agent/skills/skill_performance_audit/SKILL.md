@@ -27,7 +27,7 @@ Analyze and optimize site performance for Core Web Vitals.
 pnpm taia:lighthouse https://site-url.com
 ```
 
-Record results in `/_taia/perf/audit-YYYY-MM-DD.md`.
+Record results in `/_context/perf/audit-YYYY-MM-DD.md`.
 
 ### Step 2: Analyze Results
 
@@ -74,7 +74,7 @@ Common issues checklist:
 
 ### Step 4: Create Report
 
-Output to `/_taia/perf/audit-YYYY-MM-DD.md`:
+Output to `/_context/perf/audit-YYYY-MM-DD.md`:
 
 ```markdown
 # Performance Audit Report
@@ -156,7 +156,7 @@ npx lighthouse https://url --only-categories=performance
 
 ## Outputs
 
-1. `/_taia/perf/audit-YYYY-MM-DD.md` - Full report
+1. `/_context/perf/audit-YYYY-MM-DD.md` - Full report
 2. PR with optimizations (if applicable)
 
 ## Definition of Done

@@ -1,0 +1,74 @@
+---
+const title = 'Chat'
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <style>
+    :root {
+      --primary: #f97316; /* Naranja pedido anteriormente */
+      --bg: #111827;
+      --text: #f3f4f6;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100dvh; /* Usar dynamic viewport height */
+      width: 100vw;
+      overflow: hidden;
+    }
+    header {
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .input-area {
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.2);
+      color: white;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="font-weight: bold; color: var(--primary);">Chat</div>
+    <a href="/admin" style="color: white; text-decoration: none; font-size: 0.8rem;">Volver al CMS</a>
+  </header>
+  <div class="chat-container" id="chat">
+    <div class="message">¡Bienvenido! ¿En qué puedo ayudarte hoy?</div>
+  </div>
+  <div class="input-area">
+    <input type="text" placeholder="Escribe un mensaje..." />
+  </div>
+</body>
+</html>
