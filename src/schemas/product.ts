@@ -17,7 +17,6 @@ export const productSchema = z.object({
   // Pricing
   price: z.number().positive('Price must be positive'),
   compareAtPrice: z.number().positive().optional(),
-  currency: z.string().length(3).optional().default('EUR'),
 
   // Media
   images: z.array(z.object({

@@ -33,6 +33,7 @@ export interface TaiaConfig {
   description: string
   themeColor: string
   backgroundColor: string
+  currency?: string
   faviconSource: string
   email?: string
   ga4Id?: string
@@ -58,6 +59,7 @@ export class ConfigService {
         description: 'Built with TAIA Core',
         themeColor: '#000000', // Sane defaults
         backgroundColor: '#ffffff',
+        currency: 'EUR',
         faviconSource: 'public/favicon.svg',
         languages: ['es'],
         collections: [],
@@ -430,6 +432,7 @@ export class ConfigService {
             { name: 'description', label: 'Descripción', widget: 'text', i18n: true },
             { name: 'themeColor', label: 'Color del Tema', widget: 'string', i18n: 'duplicate' },
             { name: 'backgroundColor', label: 'Color de Fondo', widget: 'string', i18n: 'duplicate' },
+            { name: 'currency', label: 'Moneda', widget: 'string', default: 'EUR', i18n: 'duplicate' },
             { name: 'faviconSource', label: 'Favicon', widget: 'image', hint: 'Ruta relativa, ej: public/favicon.svg', i18n: 'duplicate' },
             { name: 'email', label: 'Email', widget: 'string', required: false, i18n: 'duplicate' },
             { name: 'phone', label: 'Teléfono', widget: 'string', required: false, i18n: 'duplicate' },

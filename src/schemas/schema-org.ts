@@ -103,7 +103,6 @@ export function getSchemaFields (type: SchemaOrgType): CMSField[] {
         { name: 'images', label: 'Imágenes', widget: 'image', multiple: true, required: false, i18n: 'duplicate' },
         { name: 'price', label: 'Precio', widget: 'number', required: true, i18n: 'duplicate' },
         { name: 'compareAtPrice', label: 'Precio Comparado', widget: 'number', required: false, i18n: 'duplicate' },
-        { name: 'currency', label: 'Moneda', widget: 'string', default: 'EUR', i18n: 'duplicate' },
         { name: 'sku', label: 'SKU', widget: 'string', i18n: 'duplicate' },
         { name: 'brand', label: 'Marca', widget: 'string', i18n: 'duplicate' },
         { name: 'gtin', label: 'GTIN', widget: 'string', required: false, i18n: 'duplicate' },

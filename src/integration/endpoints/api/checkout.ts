@@ -11,6 +11,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const defaultLang = configService.getDefaultLanguage()
     const stripeLocale = defaultLang === 'en' ? 'en' : 'es'
     const taiaConfig = configService.getTaiaConfig()
+    const currency = typeof taiaConfig.currency === 'string' ? taiaConfig.currency : 'EUR'
+    const stripeCurrency = currency.toLowerCase()
     const productsCollection = taiaConfig.collections.find((item) => item.id === 'products')
     const productsPrefix = productsCollection
       ? configService.getCollectionPrefix(productsCollection, defaultLang)
@@ -41,7 +43,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const lineItems = items.map((item: any) => {
       const lineItem: any = {
         price_data: {
-          currency: 'eur',
+          currency: stripeCurrency,
           product_data: {
             name: item.title
           },
