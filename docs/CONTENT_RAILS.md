@@ -174,7 +174,6 @@ slug: premium-widget-pro
 description: Our most advanced widget with all features included.
 price: 199.99
 compareAtPrice: 249.99
-currency: EUR
 category: widgets
 images:
   - src: /uploads/products/widget-pro-1.jpg

@@ -43,7 +43,6 @@ export const productSchema = z.object({
   description: z.string().min(1),
   price: z.number().positive(),
   compareAtPrice: z.number().positive().optional(),
-  currency: z.string().length(3).default('EUR'),
   images: z.array(z.object({
     src: z.string(),
     alt: z.string()
@@ -65,7 +64,6 @@ title: Product Name
 slug: product-name
 description: Product description for listing pages.
 price: 29.99
-currency: EUR
 images:
   - src: /uploads/products/product-1.jpg
     alt: Product front view
@@ -143,7 +141,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   // IMPORTANT: Look up prices server-side, never trust client
   const lineItems = items.map(item => ({
     price_data: {
-      currency: 'eur',
+      currency: settings.currency.toLowerCase(),
       product_data: {
         name: item.title,
         images: [item.image]
