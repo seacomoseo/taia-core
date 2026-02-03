@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "@/*": ["*"],
+      "@components/*": ["components/*"],
+      "@layouts/*": ["layouts/*"],
+      "@lib/*": ["lib/*"],
+      "@content/*": ["content/*"],
+      "@core/*": ["core/src/*"]
+    },
+    "types": ["node", "@cloudflare/workers-types"]
+  },
+  "include": [
+    "../../.astro/types.d.ts",
+    "../../components/**/*",
+    "../../content/**/*",
+    "../../templates/**/*",
+    "../../core/src/types/**/*",
+    "../../functions/**/*",
+    "../../*.config.*"
+  ]
+}

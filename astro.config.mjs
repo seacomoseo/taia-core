@@ -1,20 +1,6 @@
-import { defineConfig } from 'astro/config'
+import { createTaiaAstroConfig } from './src/integration/astro-config.ts'
 
-export default defineConfig({
+export default createTaiaAstroConfig({
   output: 'static',
-  build: {
-    assets: 'assets',
-    inlineStylesheets: 'auto'
-  },
-  vite: {
-    build: {
-      cssMinify: true,
-      minify: true
-    }
-  },
-  compressHTML: true,
-  prefetch: {
-    prefetchAll: false,
-    defaultStrategy: 'hover'
-  }
+  useCloudflare: false
 })

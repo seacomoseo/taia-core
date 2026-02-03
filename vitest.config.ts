@@ -1,9 +1,10 @@
 import { defineConfig } from 'vitest/config'
+import vitestBaseConfig from './configs/vitest.base.ts'
 
 export default defineConfig({
+  ...vitestBaseConfig,
   test: {
-    include: ['src/**/*.test.ts'],
-    environment: 'node',
-    globals: true
+    ...vitestBaseConfig.test,
+    include: ['src/**/*.test.ts', 'core/src/**/*.test.ts']
   }
 })
