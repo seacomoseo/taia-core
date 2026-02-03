@@ -30,7 +30,7 @@ export const productSchema = z.object({
   quantity: z.number().int().nonnegative().optional(),
 
   // Taxonomy
-  category: z.string().optional(),
+  categories: z.array(z.string()).optional().default([]),
   tags: z.array(z.string()).optional().default([]),
 
   // Variants (optional for MVP)

@@ -307,6 +307,8 @@ export class ConfigService {
       i18n: 'duplicate'
     }
 
+    const taxonomyRelations: Array<{ target: string; field: any }> = []
+
     // Generar colecciones dinámicas
     for (const col of taiaConfig.collections) {
       const folder = col.folder || `content/${col.id}`
@@ -316,21 +318,24 @@ export class ConfigService {
         { name: 'body', label: 'Contenido', widget: 'markdown', i18n: true }
       ]
 
-      const taxonomyTargets = Array.isArray(col.taxonomyOf) ? col.taxonomyOf : []
-      for (const target of taxonomyTargets) {
-        fields.push({
-          name: `related_${target}`,
-          label: `Relacionados con ${target}`,
+    const taxonomyTargets = Array.isArray(col.taxonomyOf) ? col.taxonomyOf : []
+    for (const target of taxonomyTargets) {
+      taxonomyRelations.push({
+        target,
+        field: {
+          name: col.id,
+          label: col.label,
           widget: 'relation',
-          collection: target,
-          search_fields: ['title', 'slug'],
+          collection: col.id,
+          search_fields: ['slug', 'title'],
           value_field: '{{slug}}',
-          display_fields: ['title', 'slug'],
+          display_fields: ['slug'],
           multiple: true,
           required: false,
           i18n: 'duplicate'
-        })
-      }
+        }
+      })
+    }
 
       config.collections.push({
         name: col.id,
@@ -345,6 +350,13 @@ export class ConfigService {
         thumbnail: ['image', 'images.*'],
         fields: fields
       })
+    }
+
+    for (const relation of taxonomyRelations) {
+      const targetCollection = config.collections.find((existing: any) => existing.name === relation.target)
+      if (targetCollection) {
+        targetCollection.fields.push(relation.field)
+      }
     }
 
     // Generar colección de singles
