@@ -26,8 +26,7 @@ taia-pilot/          # Demo project
     │   ├── scripts/     # CLI tools (validate, link-checker, lighthouse)
     │   └── utils/       # Shared utilities
     ├── docs/            # Agent documentation and rails
-    └── .agent/          # Antigravity configuration
-        ├── rules/       # Repository rules
+    └── agents/          # Agent system
         └── skills/      # Specialized agent skills
 ```
 
@@ -121,23 +120,12 @@ Projects consuming taia-core can:
 
 ## Agent Configuration
 
-### Rules
-See `.agent/rules/` for mandatory guidelines:
-- `00-global.md` - Code standards and workflow
-- `10-seo.md` - SEO requirements
-- `11-performance.md` - Performance budgets
-- `12-accessibility.md` - WCAG compliance
-- `20-ecommerce.md` - E-commerce standards
-- `21-marketing.md` - Marketing and tracking
-- `30-cms.md` - CMS configuration
-- `40-pr-workflow.md` - PR process
-- `50-skills.md` - Skills usage guide
+See `core/AGENTS.md` for the canonical agent policy and workflow.
 
-### Skills
-See `.agent/skills/` for specialized tasks:
-- **Discovery**: Project Intake (Context ingestion), Competitive Analysis.
+Skills live in `core/agents/skills/`:
+- **Discovery**: Project Intake, Competitive Analysis.
 - **Strategy**: SWOT Analysis (DAFO), Marketing Strategy, SEO Strategy, Local SEO, Paid Ads.
-- **Identity**: Brand Identity (Manuals & Voice).
+- **Identity**: Brand Identity.
 - **Development**: CMS Schema Generator, E-commerce MVP.
 - **Quality**: Performance Audit, UX Review.
-- **Delivery**: Delivery Presenter (The "Wow" moment), PR Workflow, Skill Manager.
+- **Delivery**: Delivery Presenter, PR Workflow, Skill Manager.

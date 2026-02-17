@@ -1,0 +1,15 @@
+version: 1
+skills_root: core/agents/skills
+owner: taia-core
+meta_skill: skill_skill_ops
+domains:
+  - discovery
+  - strategy
+  - branding
+  - seo
+  - sem
+  - web-delivery
+  - operations
+notes:
+  - AGENTS policy is canonical at core/AGENTS.md
+  - Skills are executable playbooks and should stay composable

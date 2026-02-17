@@ -27,7 +27,7 @@ git checkout -b docs/update-readme
 
 ### Step 2: Make Changes
 
-Follow relevant rules from `.agent/rules/`.
+Follow the canonical rules in `core/AGENTS.md`.
 
 ### Step 3: Run Quality Gates
 

@@ -1,107 +1,23 @@
 # TAIA Core
 
-Fundación reutilizable para sitios web Astro de alto rendimiento y optimizados para SEO.
+Reusable Astro foundation for high-performance, SEO-focused sites, used by the TAIA Pilot project.
 
-## Características
+## What it provides
 
-- 🚀 **Rendimiento primero**: Orientado a puntuaciones de 100/100/100/100 en Lighthouse.
-- 🔍 **Listo para SEO**: Meta tags completos, JSON-LD, soporte para sitemap.
-- ♿ **Accesible**: Componentes que cumplen con WCAG 2.1 AA.
-- 📝 **Validación de contenido**: Esquemas Zod para contenido con tipado seguro.
-- 🤖 **Amigable para agentes**: Guías y documentación claras para asistentes IA.
+- Base layouts and primitives (SEO, images, links, accessibility).
+- Zod schemas for content validation.
+- CMS integration with dynamic config.
+- Performance and SEO rails.
 
-## Instalación como submódulo
+## Quick setup (submodule)
 
 ```bash
 git submodule add https://github.com/seacomoseo/taia-core.git core
 ```
 
-## Componentes
+## Where to look
 
-| Componente | Descripción |
-|------------|-------------|
-| `SeoHead` | Meta SEO completo, OG, Twitter, JSON-LD |
-| `ResponsiveImage` | Imágenes optimizadas con srcset |
-| `SmartLink` | Detección automática interno/externo |
-| `SectionShell` | Envoltorio de layout consistente |
-| `SkipLink` | Navegación de salto para accesibilidad |
-| `FocusOutlines` | Estilos de foco para teclado |
-
-## Layouts
-
-| Layout | Caso de Uso |
-|--------|-------------|
-| `BaseLayout` | Shell HTML raíz |
-| `PageLayout` | Páginas individuales |
-| `CollectionLayout` | Listados/archivos con paginación |
-
-## Esquemas
-
-Esquemas Zod para validación de contenido:
-
-```typescript
-import { pageSchema, postSchema, productSchema } from 'taia-core/schemas'
-```
-
-## Herramientas CLI
-
-```bash
-pnpm taia:validate          # Validar contenido contra esquemas
-pnpm taia:links             # Comprobar enlaces internos rotos
-pnpm taia:lighthouse <url>  # Ejecutar Lighthouse con budgets
-```
-
-## Content Model
-
-- `content/settings.yml` define colecciones, singles, iconos y singular
-- `content/<collection>/_index.<lang>.md` usa `path` (prefijo hijos) y `slug` (landing)
-- `content/singles/_home.<lang>.md` define la home
-- Config CMS dinámico en `/admin/config.yml`
-- Campos traducibles usan `i18n: true` y técnicos `i18n: 'duplicate'`
-
-## Puertas de Calidad
-
-```bash
-pnpm lint          # ESLint (StandardJS + TypeScript)
-pnpm typecheck     # Verificación de TypeScript
-pnpm test          # Tests de Vitest
-pnpm build         # Verificación de construcción
-```
-
-## Objetivos de Rendimiento
-
-| Métrica | Objetivo |
-|---------|----------|
-| Rendimiento | ≥ 90 |
-| Accesibilidad | 100 |
-| Mejores Prácticas | 100 |
-| SEO | 100 |
-| LCP | ≤ 2.5s |
-| CLS | ≤ 0.1 |
-| TBT | ≤ 200ms |
-
-## Documentación
-
-- [Sistema TAIA](./docs/TAIA_SYSTEM.md) - Visión general de la arquitectura
-- [SEO Rails](./docs/SEO_RAILS.md) - Guías de SEO
-- [Performance Rails](./docs/PERFORMANCE_RAILS.md) - Optimización de rendimiento
-- [Content Rails](./docs/CONTENT_RAILS.md) - Estructura de contenido
-
-## Habilidades del Agente
-
-Ubicadas en `.agent/skills/`:
-
-| Habilidad | Propósito |
-|-----------|-----------|
-| `skill_project_intake` | Recopilar requisitos |
-| `skill_brand_identity` | Marca y mensajería |
-| `skill_seo_strategy` | Investigación de palabras clave y arquitectura de URLs |
-| `skill_ux_review` | Auditoría de UX y accesibilidad |
-| `skill_performance_audit` | Pruebas de Lighthouse |
-| `skill_cms_schema_generator` | Configuración del CMS |
-| `skill_pr_workflow` | Estándares de Pull Request |
-| `skill_ecommerce_mvp` | Configuración de e-commerce |
-
-## Licencia
-
-MIT
+- `core/src/` - Core code, schemas, utilities.
+- `core/docs/` - Rails for SEO, performance, and content.
+- `core/AGENTS.md` - Agent instructions and system policy.
+- `core/agents/skills/` - Reusable multi-agent skills library.

@@ -10,21 +10,21 @@ Generate and manage project requirements gathering, including context ingestion 
 ## When to Use
 
 - Starting a new project.
-- Client provides raw materials in `/_context/_init/`.
+- Client provides raw materials in `/_context/init/` or `/_context/_init/`.
 - Need to identify and fill gaps in project requirements.
 
 ## Inputs
 
 1. **Client Brief**: Any existing information about the project.
-2. **Initial Context**: A directory `/_context/_init/` containing raw files, notes, or branding.
+2. **Initial Context**: A directory `/_context/init/` (preferred) or `/_context/_init/` containing raw files, notes, or branding.
 3. **Project Type**: website, e-commerce, blog, landing page.
 
 ## Process
 
 ### Step 1: Raw Context Ingestion
 
-If the `/_context/_init/` directory exists, analyze every file to build a comprehensive base:
-- **Scan** the `/_context/_init/` directory.
+If `/_context/init/` or `/_context/_init/` exists, analyze every file to build a comprehensive base:
+- **Scan** the available init directory.
 - **Read** text files, notes, and extract information from structured documents.
 - **Identify** gaps: What is here? What is missing? (Branding? SWOT? USP?).
 - **Summarize** findings in `/_context/intake/raw-context-summary.md`.
@@ -33,7 +33,7 @@ If the `/_context/_init/` directory exists, analyze every file to build a compre
 
 Once the information has been ingested and summarized:
 - **Move** useful assets (like logos or confirmed photos) to their respective folders (e.g., `/_context/brand/logos/`).
-- **Archive or Delete** redundant, temporary or excessively heavy files from `/_context/_init/` that do not contribute to the final project.
+- **Archive or Delete** redundant, temporary or excessively heavy files from the init directory that do not contribute to the final project.
 - **Goal**: Leave the project structure clean and focused on action items.
 
 ### Step 3: Analyze Information Gaps
@@ -127,7 +127,7 @@ Create `/_context/intake/assets-needed.md`:
 
 ## Definition of Done
 
-- [ ] All files in `/_context/_init/` processed.
+- [ ] All files in `/_context/init/` or `/_context/_init/` processed.
 - [ ] Initialization folder cleaned or reorganized as appropriate.
 - [ ] Information gaps clearly identified.
 - [ ] Critical questions prioritized for client.
