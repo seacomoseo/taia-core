@@ -76,15 +76,15 @@ const showPagination = totalPages > 1
 
   <slot name="header" />
 
-  <main id="main-content" class="collection-main">
+  <main id="main-content" class="flex-1">
     <SectionShell size="lg" padding="md">
       <!-- Collection Header -->
-      <header class="collection-header">
+      <header class="mb-8 text-center">
         {collectionTitle && (
-          <h1 class="collection-title">{collectionTitle}</h1>
+          <h1 class="mb-2 text-4xl font-bold leading-tight md:text-5xl">{collectionTitle}</h1>
         )}
         {totalItems !== undefined && (
-          <p class="collection-count">
+          <p class="text-sm text-[var(--color-text-muted)]">
             {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </p>
         )}
@@ -93,38 +93,38 @@ const showPagination = totalPages > 1
       </header>
 
       <!-- Collection Grid -->
-      <div class="collection-grid">
+      <div class="mb-12 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
         <slot />
       </div>
 
       <!-- Pagination -->
       {showPagination && (
-        <nav class="pagination" aria-label="Pagination">
+        <nav class="flex items-center justify-center gap-6 border-t border-[var(--color-border)] pt-8" aria-label="Pagination">
           {prevPage
             ? (
-              <a href={prevPage} class="pagination-link pagination-prev">
-              ← Previous
+              <a href={prevPage} class="rounded-md px-4 py-2 font-medium transition-colors hover:bg-[var(--color-bg-alt)]">
+               ← Previous
               </a>
             )
             : (
-              <span class="pagination-link pagination-prev pagination-disabled">
-              ← Previous
+              <span class="cursor-not-allowed rounded-md px-4 py-2 font-medium opacity-50">
+               ← Previous
               </span>
             )}
 
-          <span class="pagination-info">
+          <span class="text-sm text-[var(--color-text-muted)]">
             Page {currentPage} of {totalPages}
           </span>
 
           {nextPage
             ? (
-              <a href={nextPage} class="pagination-link pagination-next">
-              Next →
+              <a href={nextPage} class="rounded-md px-4 py-2 font-medium transition-colors hover:bg-[var(--color-bg-alt)]">
+               Next →
               </a>
             )
             : (
-              <span class="pagination-link pagination-next pagination-disabled">
-              Next →
+              <span class="cursor-not-allowed rounded-md px-4 py-2 font-medium opacity-50">
+               Next →
               </span>
             )}
         </nav>
@@ -136,74 +136,3 @@ const showPagination = totalPages > 1
 
   <slot name="footer-scripts" slot="footer-scripts" />
 </BaseLayout>
-
-<style>
-  .collection-main {
-    flex: 1;
-  }
-
-  .collection-header {
-    margin-bottom: var(--space-xl);
-    text-align: center;
-  }
-
-  .collection-title {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: var(--space-sm);
-  }
-
-  .collection-count {
-    color: var(--color-text-muted);
-    font-size: 0.875rem;
-  }
-
-  .collection-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--space-lg);
-    margin-bottom: var(--space-2xl);
-  }
-
-  .pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--space-lg);
-    padding-top: var(--space-xl);
-    border-top: 1px solid var(--color-border);
-  }
-
-  .pagination-link {
-    padding: var(--space-sm) var(--space-md);
-    border-radius: var(--radius-md);
-    text-decoration: none;
-    font-weight: 500;
-    transition: background-color var(--transition-fast);
-  }
-
-  .pagination-link:not(.pagination-disabled):hover {
-    background-color: var(--color-bg-alt);
-  }
-
-  .pagination-disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .pagination-info {
-    color: var(--color-text-muted);
-    font-size: 0.875rem;
-  }
-
-  @media (min-width: 768px) {
-    .collection-title {
-      font-size: 2.5rem;
-    }
-
-    .collection-grid {
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    }
-  }
-</style>

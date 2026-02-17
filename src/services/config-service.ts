@@ -477,12 +477,14 @@ export class ConfigService {
       name: 'settings',
       label: 'settings',
       icon: 'settings',
+      i18n: true,
       files: [
         {
           name: 'general',
           label: 'general',
           icon: 'build',
           file: 'content/settings.yml',
+          i18n: false,
           editor: { preview: false },
           fields: [
             { name: 'siteUrl', label: 'siteUrl', widget: 'string', required: false, hint: 'siteUrl' },
@@ -513,7 +515,10 @@ export class ConfigService {
               name: 'cmsLocale',
               label: 'cmsLocale',
               widget: 'select',
-              options: ['es', 'en'],
+              options: [
+                { label: '🇪🇸 ES', value: 'es' },
+                { label: '🇬🇧 EN', value: 'en' }
+              ],
               default: 'es',
             },
             { 
@@ -553,7 +558,7 @@ export class ConfigService {
         {
           name: 'globals',
           label: 'globals',
-          icon: 'tune',
+          icon: 'dictionary',
           file: 'content/globals/{{locale}}.yml',
           i18n: true,
           editor: { preview: false },
