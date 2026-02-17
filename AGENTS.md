@@ -107,3 +107,19 @@ If instructions conflict, follow the higher level and document tradeoffs.
 - `core/docs/*` are reference rails and deep context.
 - `core/docs/IMPLEMENTATION_STACK.md` documents Astro + Sveltia + Tailwind setup details.
 - Update all affected layers when system behavior changes.
+
+## Core Change Tracking Protocol
+
+When a request modifies `core/` behavior, evaluate and update this triad:
+
+1. Policy changes -> `core/AGENTS.md`
+2. Workflow/playbook changes -> `core/agents/skills/*/SKILL.md`
+3. Reference/rails changes -> `core/docs/*`
+
+Additionally, create a short traceability entry in `core/docs/CORE_CHANGELOG.md` including:
+
+- date
+- change id/title
+- impacted paths
+- why the change was made
+- follow-up required (if any)

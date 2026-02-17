@@ -54,6 +54,11 @@ For each skill, verify:
 
 1. Update `core/agents/manifest.yml` if domain scope changes.
 2. Document major skill changes in PR body.
+3. If the request affects `core/` behavior, apply the Core Change Tracking triad:
+   - policy in `core/AGENTS.md`
+   - skills in `core/agents/skills/*/SKILL.md`
+   - docs in `core/docs/*`
+4. Append a concise entry to `core/docs/CORE_CHANGELOG.md`.
 
 ### Step 6: External patterns review
 
@@ -69,6 +74,7 @@ When improving skill quality, review and selectively adapt patterns from:
 
 1. Updated or new skill files in `core/agents/skills/skill_*/SKILL.md`.
 2. Optional audit report in `/_context/skills/audit-YYYY-MM-DD.md`.
+3. Updated `core/docs/CORE_CHANGELOG.md` when core behavior changes.
 
 ## Definition of Done
 
@@ -76,3 +82,4 @@ When improving skill quality, review and selectively adapt patterns from:
 - [ ] Skills are focused, non-duplicative, and triggerable.
 - [ ] Compatibility paths are valid.
 - [ ] Canonical policy alignment with `core/AGENTS.md` is preserved.
+- [ ] Core behavior changes are traceable in `core/docs/CORE_CHANGELOG.md`.
