@@ -3,9 +3,18 @@ import yaml from 'js-yaml'
 import YAML from 'yaml'
 import fs from 'node:fs'
 import path from 'node:path'
-import { getSchemaFields, SchemaOrgType as SchemaOrgTypeEnum, type SchemaOrgType as SchemaOrgTypeValue } from '../schemas/schema-org'
+import vm from 'node:vm'
+import { fileURLToPath } from 'node:url'
+import { getSchemaFields, SchemaOrgType as SchemaOrgTypeEnum, type SchemaOrgType as SchemaOrgTypeValue, type CMSField } from '../schemas/schema-org'
 
 export type { SchemaOrgTypeValue as SchemaOrgType }
+
+interface CmsTranslations {
+  labels: Record<string, string>
+  hints: Record<string, string>
+  collections?: Record<string, string>
+  files?: Record<string, string>
+}
 
 export interface CollectionConfig {
   id: string
@@ -35,6 +44,7 @@ export interface TaiaConfig {
   backgroundColor: string
   currency?: string
   faviconSource: string
+  cmsLocale?: string
   email?: string
   ga4Id?: string
   languages: string[]
@@ -61,6 +71,7 @@ export class ConfigService {
         backgroundColor: '#ffffff',
         currency: 'EUR',
         faviconSource: 'public/favicon.svg',
+        cmsLocale: 'es',
         languages: ['es'],
         collections: [],
         singles: []
@@ -91,6 +102,12 @@ export class ConfigService {
   getDefaultLanguage(): string {
     const config = this.getTaiaConfig()
     return config.languages[0] || 'es'
+  }
+
+  getCmsLocale(): string {
+    const config = this.getTaiaConfig()
+    const cmsLocale = typeof config.cmsLocale === 'string' ? config.cmsLocale : 'es'
+    return cmsLocale === 'en' ? 'en' : 'es'
   }
 
   hasProductCollection (): boolean {
@@ -197,6 +214,30 @@ export class ConfigService {
     return this.listAstroFiles(dir)
   }
 
+  private getTemplateFields (templateName?: string): CMSField[] {
+    if (!templateName) return []
+    const filePath = path.join(this.projectRoot, 'templates', `${templateName}.astro`)
+    if (!fs.existsSync(filePath)) return []
+    const source = fs.readFileSync(filePath, 'utf8')
+    const fields = this.extractExportedValue(source, 'cmsFields')
+    if (!Array.isArray(fields)) return []
+    return fields.filter((field) => field && typeof field === 'object' && typeof field.name === 'string')
+  }
+
+  private mergeCmsFields (baseFields: CMSField[], extraFields: CMSField[]): CMSField[] {
+    if (!extraFields.length) return baseFields
+    const seen = new Set(baseFields.map((field) => field.name))
+    const merged = [...baseFields]
+    for (const field of extraFields) {
+      if (!field || typeof field.name !== 'string') continue
+      if (seen.has(field.name)) continue
+      seen.add(field.name)
+      const normalized = this.normalizeProjectField(field, [field.name])
+      merged.push(this.applyCmsFieldDefaults(normalized, true))
+    }
+    return merged
+  }
+
   getCmsConfigFingerprint (): string {
     const hash = crypto.createHash('sha256')
     if (fs.existsSync(this.configPath)) {
@@ -219,6 +260,8 @@ export class ConfigService {
   generateConfigYml (): string {
     const taiaConfig = this.getTaiaConfig()
     const defaultLang = this.getDefaultLanguage()
+    const cmsLocale = this.getCmsLocale()
+    const cmsTranslations = this.getCmsTranslations(cmsLocale)
     
     const config: any = {
       backend: {
@@ -275,9 +318,9 @@ export class ConfigService {
     const templateNames = this.getTemplates()
     const componentNames = this.getComponents()
 
-    const templateRelationField = {
+    const templateRelationField: CMSField = {
       name: 'template',
-      label: 'Plantilla',
+      label: 'template',
       widget: 'relation',
       collection: 'templates',
       search_fields: ['slug'],
@@ -287,23 +330,24 @@ export class ConfigService {
       i18n: 'duplicate'
     }
 
-    const iconField = {
+    const iconField: CMSField = {
       name: 'icon',
-      label: 'Icono (Material Symbols)',
+      label: 'icon',
       widget: 'string',
       required: false,
-      hint: 'Nombre del icono, ej: home, article, storefront',
+      hint: 'icon',
       i18n: 'duplicate'
     }
 
-    const taxonomyOfField = {
+    const taxonomyOfField: CMSField = {
       name: 'taxonomyOf',
-      label: 'Taxonomía de',
+      label: 'taxonomyOf',
+      label_singular: 'collection',
       widget: 'list',
       allow_add: true,
       required: false,
-      hint: 'IDs de colecciones relacionadas (ej: posts, products)',
-      field: { name: 'collectionId', label: 'Colección', widget: 'string' },
+      hint: 'taxonomyOf',
+      field: { name: 'collectionId', label: 'collectionId', widget: 'string' },
       i18n: 'duplicate'
     }
 
@@ -315,8 +359,10 @@ export class ConfigService {
       
       const fields = [
         ...getSchemaFields(col.schemaType),
-        { name: 'body', label: 'Contenido', widget: 'markdown', i18n: true }
+        { name: 'body', label: 'body', widget: 'markdown', i18n: true }
       ]
+      const templateFields = this.getTemplateFields(col.template)
+      const mergedFields = this.mergeCmsFields(fields, templateFields)
 
     const taxonomyTargets = Array.isArray(col.taxonomyOf) ? col.taxonomyOf : []
     for (const target of taxonomyTargets) {
@@ -327,9 +373,9 @@ export class ConfigService {
           label: col.label,
           widget: 'relation',
           collection: col.id,
-          search_fields: ['slug', 'title'],
+          search_fields: ['title', 'slug'],
           value_field: '{{slug}}',
-          display_fields: ['slug'],
+          display_fields: ['title'],
           multiple: true,
           required: false,
           i18n: 'duplicate'
@@ -348,7 +394,7 @@ export class ConfigService {
         slug: '{{slug}}.{{locale}}.md', // Se usará lógica de idioma con la extensión
         icon: col.icon,
         thumbnail: ['image', 'images.*'],
-        fields: fields
+        fields: mergedFields
       })
     }
 
@@ -363,28 +409,26 @@ export class ConfigService {
     if (taiaConfig.singles.length > 0) {
       config.collections.push({
         name: 'singles',
-        label: 'Páginas Individuales',
+        label: 'singles',
         icon: 'file_open',
         i18n: true,
         editor: { preview: false },
         files: taiaConfig.singles.map((page) => {
-          // Inferir archivo base con idioma por defecto
-          const underscoredFile = `content/singles/_${page.id}.${defaultLang}.md`
-          const defaultFile = `content/singles/${page.id}.${defaultLang}.md`
-          const file = page.file || (fs.existsSync(path.join(this.projectRoot, underscoredFile)) ? underscoredFile : defaultFile)
-          
+          const templateFields = this.getTemplateFields(page.template)
+          const fields = this.mergeCmsFields([
+            ...getSchemaFields(page.schemaType),
+            { name: 'body', label: 'body', widget: 'markdown', required: false, i18n: true }
+          ], templateFields)
+
           return {
             name: page.id,
             label: page.label,
-            file: `${file}.{{locale}}.md`,
+            file: `content/singles/${page.id}.{{locale}}.md`,
             i18n: true,
             editor: { preview: false },
             icon: page.icon,
             thumbnail: ['image', 'images.*'],
-            fields: [
-              ...getSchemaFields(page.schemaType),
-              { name: 'body', label: 'Contenido', widget: 'markdown', i18n: true }
-            ]
+            fields: fields
           }
         })
       })
@@ -393,7 +437,8 @@ export class ConfigService {
     if (templateNames.length > 0) {
       config.collections.push({
         name: 'templates',
-        label: 'Plantillas',
+        label: 'templates',
+        label_singular: 'template',
         folder: 'templates',
         icon: 'castle',
         create: true,
@@ -402,7 +447,7 @@ export class ConfigService {
         format: 'raw',
         editor: { preview: false },
         fields: [
-          { name: 'body', label: 'Código', widget: 'code', output_code_only: true }
+          { name: 'body', label: 'code', widget: 'code', output_code_only: true }
         ]
       })
     }
@@ -410,7 +455,8 @@ export class ConfigService {
     if (componentNames.length > 0) {
       config.collections.push({
         name: 'components',
-        label: 'Componentes',
+        label: 'components',
+        label_singular: 'component',
         folder: 'components',
         icon: 'brick',
         create: true,
@@ -419,99 +465,106 @@ export class ConfigService {
         format: 'raw',
         editor: { preview: false },
         fields: [
-          { name: 'body', label: 'Código', widget: 'code', output_code_only: true }
+          { name: 'body', label: 'code', widget: 'code', output_code_only: true }
         ]
       })
     }
     
+    const globalsFields = this.buildGlobalsFields(cmsLocale)
+
     // Configuración editable
     config.collections.push({
       name: 'settings',
-      label: 'Configuración',
+      label: 'settings',
       icon: 'settings',
-      i18n: true,
       files: [
         {
           name: 'general',
-          label: 'General',
+          label: 'general',
           icon: 'build',
           file: 'content/settings.yml',
-          i18n: false,
           editor: { preview: false },
           fields: [
-            { name: 'siteUrl', label: 'URL del Sitio', widget: 'string', required: false, hint: 'https://example.com', i18n: 'duplicate' },
-            { name: 'siteName', label: 'Nombre del Sitio', widget: 'string', i18n: true },
-            { name: 'description', label: 'Descripción', widget: 'text', i18n: true },
-            { name: 'themeColor', label: 'Color del Tema', widget: 'string', i18n: 'duplicate' },
-            { name: 'backgroundColor', label: 'Color de Fondo', widget: 'string', i18n: 'duplicate' },
-            { name: 'currency', label: 'Moneda', widget: 'string', default: 'EUR', i18n: 'duplicate' },
-            { name: 'faviconSource', label: 'Favicon', widget: 'image', hint: 'Ruta relativa, ej: public/favicon.svg', i18n: 'duplicate' },
-            { name: 'email', label: 'Email', widget: 'string', required: false, i18n: 'duplicate' },
-            { name: 'phone', label: 'Teléfono', widget: 'string', required: false, i18n: 'duplicate' },
-            { name: 'address', label: 'Dirección', widget: 'text', required: false, i18n: true },
-            { name: 'ga4Id', label: 'Google Analytics 4 ID', widget: 'string', required: false, hint: 'G-XXXXXXXXXX', i18n: 'duplicate' },
+            { name: 'siteUrl', label: 'siteUrl', widget: 'string', required: false, hint: 'siteUrl' },
+            { name: 'siteName', label: 'siteName', widget: 'string' },
+            { name: 'description', label: 'description', widget: 'text' },
+            { name: 'themeColor', label: 'themeColor', widget: 'string' },
+            { name: 'backgroundColor', label: 'backgroundColor', widget: 'string' },
+            { name: 'currency', label: 'currency', widget: 'string', default: 'EUR' },
+            { name: 'faviconSource', label: 'faviconSource', widget: 'image', hint: 'faviconSource' },
+            { name: 'email', label: 'email', widget: 'string', required: false },
+            { name: 'phone', label: 'phone', widget: 'string', required: false },
+            { name: 'address', label: 'address', widget: 'text', required: false },
+            { name: 'ga4Id', label: 'ga4Id', widget: 'string', required: false, hint: 'ga4Id' },
             {
               name: 'languages',
-              label: 'Idiomas',
-              label_singular: 'Idioma',
+              label: 'languages',
+              label_singular: 'lang',
               widget: 'list',
               default: ['es'],
-              hint: 'Código de idioma [ISO-639-1](https://es.wikipedia.org/wiki/ISO_639-1) + Variante Regional opcional [ISO 3166-1](https://es.wikipedia.org/wiki/ISO_3166-1)',
+              hint: 'languages',
               collapsed: true,
               minimize_collapsed: true,
               field: [
-                { name: 'lang', label: 'Idioma', widget: 'string', i18n: true }
+                { name: 'lang', label: 'lang', widget: 'string' }
               ]
+            },
+            {
+              name: 'cmsLocale',
+              label: 'cmsLocale',
+              widget: 'select',
+              options: ['es', 'en'],
+              default: 'es',
             },
             { 
               name: 'collections', 
-              label: 'Colecciones', 
+              label: 'collections', 
+              label_singular: 'collection',
               widget: 'list',
               collapsed: true,
               minimize_collapsed: true,
               fields: [
-                { name: 'id', label: 'ID', widget: 'string', i18n: 'duplicate' },
-                { name: 'label', label: 'Etiqueta', widget: 'string', i18n: true },
-                { name: 'singular', label: 'Singular', widget: 'string', required: false, i18n: true },
+                { name: 'id', label: 'id', widget: 'string' },
+                { name: 'label', label: 'label', widget: 'string' },
+                { name: 'singular', label: 'singular', widget: 'string', required: false },
                 iconField,
-                { name: 'schemaType', label: 'Tipo Schema', widget: 'select',  options: availableSchemas, i18n: 'duplicate' },
+                { name: 'schemaType', label: 'schemaType', widget: 'select',  options: availableSchemas },
                 templateRelationField,
                 taxonomyOfField
               ]
             },
             { 
               name: 'singles', 
-              label: 'Páginas Individuales', 
+              label: 'singles', 
+              label_singular: 'single',
               widget: 'list',
               collapsed: true,
               minimize_collapsed: true,
               fields: [
-                { name: 'id', label: 'ID', widget: 'string', i18n: 'duplicate' },
-                { name: 'label', label: 'Etiqueta', widget: 'string', i18n: true },
+                { name: 'id', label: 'id', widget: 'string' },
+                { name: 'label', label: 'label', widget: 'string' },
                 iconField,
-                { name: 'schemaType', label: 'Tipo Schema', widget: 'select',  options: availableSchemas, i18n: 'duplicate'  },
+                { name: 'schemaType', label: 'schemaType', widget: 'select',  options: availableSchemas  },
                 templateRelationField
               ]
             }
           ]
         },
         {
-          name: 'i18n',
-          label: 'Textos (i18n)',
+          name: 'globals',
+          label: 'globals',
           icon: 'tune',
-          file: 'content/i18n/{{locale}}.yml',
+          file: 'content/globals/{{locale}}.yml',
           i18n: true,
           editor: { preview: false },
-          fields: [
-            { name: 'postCard', label: 'Tarjeta de Publicación', widget: 'object', i18n: true, fields: [
-              { name: 'by', label: 'Por', widget: 'string', i18n: true }
-            ] }
-          ]
+          fields: globalsFields
         }
       ]
     })
 
-    return YAML.stringify(config, {
+    const localizedConfig = this.localizeCmsConfig(config, cmsTranslations, cmsLocale)
+
+    return YAML.stringify(localizedConfig, {
       indent: 2,
       indentSeq: false,
       blockQuote: 'literal',
@@ -519,6 +572,395 @@ export class ConfigService {
       defaultStringType: 'PLAIN',
       lineWidth: 0
     })
+  }
+
+  private getCmsTranslations (locale: string): CmsTranslations {
+    const cmsLocale = locale === 'en' ? 'en' : 'es'
+    const translationsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'cms', 'i18n')
+    const filePath = path.join(translationsDir, `${cmsLocale}.yml`)
+
+    if (!fs.existsSync(filePath)) {
+      return { labels: {}, hints: {} }
+    }
+
+    const raw = fs.readFileSync(filePath, 'utf8')
+    const data = (yaml.load(raw) as CmsTranslations) || { labels: {}, hints: {} }
+    return {
+      labels: data.labels || {},
+      hints: data.hints || {},
+      collections: data.collections || {},
+      files: data.files || {}
+    }
+  }
+
+  private localizeCmsConfig (config: any, translations: CmsTranslations, cmsLocale: string): any {
+    const localizeCollection = (collection: any) => {
+      const localized = { ...collection }
+      if (localized.name && translations.collections?.[localized.name]) {
+        localized.label = translations.collections?.[localized.name]
+      } else if (localized.label) {
+        localized.label = this.localizeCmsLabel(localized.label, translations)
+      }
+
+      if (localized.name && translations.collections?.[`${localized.name}.singular`]) {
+        localized.label_singular = translations.collections?.[`${localized.name}.singular`]
+      } else if (localized.label_singular) {
+        localized.label_singular = this.localizeCmsLabel(localized.label_singular, translations)
+      }
+      if (Array.isArray(localized.fields)) {
+        localized.fields = localized.fields.map((field: CMSField) => this.localizeCmsField(field, translations, cmsLocale))
+      }
+      if (Array.isArray(localized.files)) {
+        localized.files = localized.files.map((file: any) => {
+          const fileKey = localized.name && file.name ? `${localized.name}.${file.name}` : null
+          const fileLabel = fileKey && translations.files?.[fileKey]
+            ? translations.files?.[fileKey]
+            : (file.label ? this.localizeCmsLabel(file.label, translations) : file.label)
+
+          return {
+            ...file,
+            label: fileLabel,
+            fields: Array.isArray(file.fields)
+              ? file.fields.map((field: CMSField) => this.localizeCmsField(field, translations, cmsLocale))
+              : file.fields
+          }
+        })
+      }
+      return localized
+    }
+
+    return {
+      ...config,
+      collections: config.collections.map(localizeCollection)
+    }
+  }
+
+  private localizeCmsLabel (value: string, translations: CmsTranslations): string {
+    return translations.labels[value] || value
+  }
+
+  private localizeCmsHint (value: string, translations: CmsTranslations): string {
+    return translations.hints[value] || value
+  }
+
+  private localizeCmsField (field: CMSField, translations: CmsTranslations, cmsLocale: string): CMSField {
+    const localized: CMSField = { ...field }
+    const labelIsObject = typeof localized.label === 'object' && localized.label !== null
+    const hintIsObject = typeof localized.hint === 'object' && localized.hint !== null
+    const singularIsObject = typeof localized.label_singular === 'object' && localized.label_singular !== null
+
+    const localizedLabel = this.resolveLocalizedValue(localized.label, cmsLocale)
+    const localizedHint = this.resolveLocalizedValue(localized.hint, cmsLocale)
+    const localizedSingular = this.resolveLocalizedValue(localized.label_singular, cmsLocale)
+
+    if (labelIsObject) localized.label = localizedLabel || Object.values(localized.label as Record<string, string>)[0] || ''
+    if (hintIsObject && localizedHint) localized.hint = localizedHint
+    if (singularIsObject && localizedSingular) localized.label_singular = localizedSingular
+
+    const hasLocalizedLabel = labelIsObject
+    const hasLocalizedHint = hintIsObject
+
+    if (!hasLocalizedLabel && localized.name) {
+      const labelKey = localized.name
+      if (translations.labels[labelKey]) {
+        localized.label = translations.labels[labelKey]
+      } else if (typeof localized.label === 'string') {
+        localized.label = this.localizeCmsLabel(localized.label, translations)
+      }
+      if (!hasLocalizedHint) {
+        if (translations.hints[labelKey]) {
+          localized.hint = translations.hints[labelKey]
+        } else if (typeof localized.hint === 'string') {
+          localized.hint = this.localizeCmsHint(localized.hint, translations)
+        }
+      }
+
+      const singularLabel = translations.labels[`${labelKey}.singular`]
+      if (!localizedSingular && singularLabel) {
+        localized.label_singular = singularLabel
+      }
+    } else if (!hasLocalizedLabel) {
+      if (typeof localized.label === 'string') localized.label = this.localizeCmsLabel(localized.label, translations)
+      if (!hasLocalizedHint && typeof localized.hint === 'string') localized.hint = this.localizeCmsHint(localized.hint, translations)
+    }
+
+    if (typeof localized.label_singular === 'string') {
+      const singularTranslation = translations.labels[localized.label_singular]
+      if (singularTranslation) localized.label_singular = singularTranslation
+    }
+    if (localized.fields) {
+      localized.fields = localized.fields.map((nested) => this.localizeCmsField(nested, translations, cmsLocale))
+    }
+    if (localized.field) {
+      localized.field = this.localizeCmsField(localized.field, translations, cmsLocale)
+    }
+    return localized
+  }
+
+  private buildGlobalsFields (_cmsLocale: string): CMSField[] {
+    const sources = [
+      ...this.getTemplates().map((name) => path.join(this.projectRoot, 'templates', `${name}.astro`)),
+      ...this.getComponents().map((name) => path.join(this.projectRoot, 'components', `${name}.astro`))
+    ]
+
+    const shape: Record<string, any> = {}
+
+    for (const filePath of sources) {
+      if (!fs.existsSync(filePath)) continue
+      const source = fs.readFileSync(filePath, 'utf8')
+      const keys = this.extractTranslationKeys(source)
+      for (const key of keys) {
+        this.setShapeValue(shape, key.split('.'), 'string')
+      }
+
+      const cmsGlobals = this.extractExportedValue(source, 'cmsGlobals')
+      if (cmsGlobals && typeof cmsGlobals === 'object') {
+        this.mergeShape(shape, cmsGlobals)
+      }
+    }
+
+    return this.shapeToFields(shape, [])
+  }
+
+  private extractTranslationKeys (source: string): string[] {
+    const keys = new Set<string>()
+    const regex = /\bt\s*\(\s*[^,]+,\s*['"`]([^'"`]+)['"`]/g
+    let match: RegExpExecArray | null
+    while ((match = regex.exec(source)) !== null) {
+      if (match[1]) keys.add(match[1])
+    }
+    return Array.from(keys)
+  }
+
+  private extractExportedValue (source: string, exportName: string): any | null {
+    const exportRegex = new RegExp(`export\\s+const\\s+${exportName}\\s*=`, 'm')
+    const match = exportRegex.exec(source)
+    if (!match) return null
+
+    const startIndex = match.index + match[0].length
+    const slice = source.slice(startIndex)
+    const firstTokenMatch = /[\[{]/.exec(slice)
+    if (!firstTokenMatch) return null
+
+    const tokenIndex = startIndex + (firstTokenMatch.index || 0)
+    const valueText = this.extractBalancedExpression(source, tokenIndex)
+    if (!valueText) return null
+
+    try {
+      return vm.runInNewContext(`(${valueText})`, {})
+    } catch (error) {
+      console.warn(`Failed to parse ${exportName} in ${this.projectRoot}`, error)
+      return null
+    }
+  }
+
+  private extractBalancedExpression (source: string, startIndex: number): string | null {
+    const opening = source[startIndex]
+    if (opening !== '{' && opening !== '[') return null
+    const closing = opening === '{' ? '}' : ']'
+    let depth = 0
+    let inString: string | null = null
+    let escaped = false
+
+    for (let i = startIndex; i < source.length; i++) {
+      const char = source[i]
+      if (escaped) {
+        escaped = false
+        continue
+      }
+      if (char === '\\') {
+        escaped = true
+        continue
+      }
+      if (inString) {
+        if (char === inString) inString = null
+        continue
+      }
+      if (char === '"' || char === '\'' || char === '`') {
+        inString = char
+        continue
+      }
+      if (char === opening) depth += 1
+      if (char === closing) {
+        depth -= 1
+        if (depth === 0) return source.slice(startIndex, i + 1)
+      }
+    }
+
+    return null
+  }
+
+  private setShapeValue (target: Record<string, any>, pathParts: string[], value: any): void {
+    if (pathParts.length === 0) return
+    const [head, ...rest] = pathParts
+    if (!head) return
+    if (rest.length === 0) {
+      target[head] = target[head] ?? value
+      return
+    }
+    if (!target[head] || typeof target[head] !== 'object' || Array.isArray(target[head])) {
+      target[head] = {}
+    }
+    this.setShapeValue(target[head], rest, value)
+  }
+
+  private mergeShape (target: Record<string, any>, source: any): void {
+    if (!source || typeof source !== 'object') return
+    for (const [key, value] of Object.entries(source)) {
+      if (Array.isArray(value)) {
+        target[key] = value
+      } else if (value && typeof value === 'object') {
+        if (!target[key] || typeof target[key] !== 'object' || Array.isArray(target[key])) {
+          target[key] = {}
+        }
+        this.mergeShape(target[key], value)
+      } else {
+        target[key] = value
+      }
+    }
+  }
+
+  private shapeToFields (shape: Record<string, any>, pathParts: string[]): CMSField[] {
+    return Object.entries(shape).map(([key, value]) => {
+      const fieldPath = [...pathParts, key]
+      const label = { es: key, en: key }
+
+      if (Array.isArray(value)) {
+        const itemShape = value[0] ?? 'string'
+        if (itemShape && typeof itemShape === 'object' && !Array.isArray(itemShape)) {
+          return this.applyCmsFieldDefaults({
+            name: key,
+            label,
+            widget: 'list',
+            fields: this.shapeToFields(itemShape, fieldPath),
+            i18n: true
+          }, true)
+        }
+        return this.applyCmsFieldDefaults({
+          name: key,
+          label,
+          widget: 'list',
+          field: this.buildFieldFromValue('item', itemShape, fieldPath),
+          i18n: true
+        }, true)
+      }
+
+      if (value && typeof value === 'object') {
+        if ('widget' in value) {
+          const field = value as CMSField
+          return this.applyCmsFieldDefaults({
+            ...field,
+            name: field.name || key,
+            label: field.label || label
+          }, true)
+        }
+        return this.applyCmsFieldDefaults({
+          name: key,
+          label,
+          widget: 'object',
+          fields: this.shapeToFields(value, fieldPath),
+          i18n: true
+        }, true)
+      }
+
+      return this.buildFieldFromValue(key, value, fieldPath)
+    })
+  }
+
+  private buildFieldFromValue (name: string, value: any, pathParts: string[]): CMSField {
+    if (value && typeof value === 'object' && 'widget' in value) {
+      const field = value as CMSField
+      const normalized = this.normalizeProjectField(field, pathParts)
+      return this.applyCmsFieldDefaults({
+        ...normalized,
+        name: normalized.name || name,
+        label: normalized.label || { es: name, en: name }
+      }, true)
+    }
+
+    const widget = this.resolveWidget(value)
+    return this.applyCmsFieldDefaults({
+      name,
+      label: { es: name, en: name },
+      widget,
+      i18n: true
+    }, true)
+  }
+
+  private applyCmsFieldDefaults (field: CMSField, enforceI18n = false): CMSField {
+    const normalized: CMSField = { ...field }
+    if (normalized.required === undefined) normalized.required = false
+    if (normalized.widget === 'list') {
+      if (normalized.collapsed === undefined) normalized.collapsed = true
+      if (normalized.minimize_collapsed === undefined) normalized.minimize_collapsed = true
+      if (normalized.label_singular === undefined && normalized.label) {
+        normalized.label_singular = normalized.label
+      }
+    }
+    if (normalized.widget === 'object') {
+      if (normalized.collapsed === undefined) normalized.collapsed = true
+    }
+    if (enforceI18n) {
+      normalized.i18n = this.resolveI18nForWidget(normalized.widget)
+    }
+    if (normalized.fields) {
+      normalized.fields = normalized.fields.map((nested) => this.applyCmsFieldDefaults(nested, enforceI18n))
+    }
+    if (normalized.field) {
+      normalized.field = this.applyCmsFieldDefaults(normalized.field, enforceI18n)
+    }
+    return normalized
+  }
+
+  private resolveI18nForWidget (widget?: string): boolean | 'duplicate' {
+    const translatableWidgets = new Set(['string', 'text', 'markdown', 'object', 'list'])
+    if (widget && translatableWidgets.has(widget)) return true
+    return 'duplicate'
+  }
+
+  private resolveWidget (value: any): string {
+    const normalized = typeof value === 'string' ? value.toLowerCase() : ''
+    if (['text', 'markdown', 'number', 'boolean', 'string'].includes(normalized)) {
+      return normalized
+    }
+    return 'string'
+  }
+
+  private resolveLocalizedValue (value: string | Record<string, string> | undefined, cmsLocale: string): string | undefined {
+    if (!value) return undefined
+    if (typeof value === 'string') return value
+    if (value[cmsLocale]) return value[cmsLocale]
+    if (value.es) return value.es
+    if (value.en) return value.en
+    const fallback = Object.values(value)[0]
+    return typeof fallback === 'string' ? fallback : undefined
+  }
+
+  private normalizeProjectField (field: CMSField, pathParts: string[]): CMSField {
+    const normalized: CMSField = { ...field }
+    const fallbackLabel = { es: normalized.name || pathParts[pathParts.length - 1] || 'field', en: normalized.name || pathParts[pathParts.length - 1] || 'field' }
+
+    if (typeof normalized.label === 'string') {
+      normalized.label = { es: normalized.label, en: normalized.label }
+    } else if (!normalized.label) {
+      normalized.label = fallbackLabel
+    }
+
+    if (typeof normalized.hint === 'string') {
+      normalized.hint = { es: normalized.hint, en: normalized.hint }
+    }
+
+    if (typeof normalized.label_singular === 'string') {
+      normalized.label_singular = { es: normalized.label_singular, en: normalized.label_singular }
+    }
+
+    if (normalized.fields) {
+      normalized.fields = normalized.fields.map((nested) => this.normalizeProjectField(nested, [...pathParts, nested.name || 'item']))
+    }
+    if (normalized.field) {
+      normalized.field = this.normalizeProjectField(normalized.field, [...pathParts, normalized.field.name || 'item'])
+    }
+    return normalized
   }
 
   private normalizePathSegment (value: string): string {

@@ -44,12 +44,12 @@ function generateContentConfigModule (projectRoot: string): string {
     '',
     ...collectionDefs,
     "const singles = defineCollection({\n  schema: contentSchema,\n  loader: glob({\n    pattern: '**/*.md',\n    base: 'content/singles',\n    generateId: ({ entry, data }) => {\n      const base = entry.replace(/\\.mdx?$/, '')\n      const match = base.match(/^(.*)\\.([a-zA-Z-]+)$/)\n      const lang = match?.[2]\n      const baseName = match?.[1] ?? base\n      const normalizedBase = baseName.startsWith('_') ? baseName.slice(1) : baseName\n      const rawSlug = typeof data?.slug === 'string' ? data.slug.trim() : ''\n      const slug = rawSlug && rawSlug !== '/' ? rawSlug : normalizedBase\n      return lang ? slug + '.' + lang : slug\n    }\n  })\n})",
-    "const i18n = defineCollection({ type: 'data', schema: z.any() })",
+    "const globals = defineCollection({ type: 'data', schema: z.any() })",
     '',
     'export const collections = {',
     ...collectionExports,
     '  singles,',
-    '  i18n',
+    '  globals',
     '}',
     ''
   ].join('\n')

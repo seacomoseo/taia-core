@@ -22,9 +22,13 @@
 
 ## i18n
 
-- Translatable strings live in `content/i18n/<lang>.yml`
+- Translatable strings live in `content/globals/<lang>.yml`
 - CMS fields support `i18n: true` for localized values
 - Use `@core/utils/i18n` helpers in templates/components
+- CMS UI language is controlled by `cmsLocale` in `content/settings.yml` (es|en)
+- Templates/components can export `cmsGlobals` (globals structure) and `cmsFields` (extra CMS fields)
+- CMS label/hint translations for core fields live in `core/src/cms/i18n/<lang>.yml` and use field-name keys
+- Labels/hints for `cmsGlobals`/`cmsFields` live in `content/globals/<lang>.yml` under `labels` and `hints`
 
 ## Content Config
 

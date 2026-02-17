@@ -1,12 +1,17 @@
 import { describe, it, expect } from 'vitest'
+import fs from 'node:fs'
+import path from 'node:path'
+import yaml from 'js-yaml'
 import {
   seoSchema,
   pageSchema,
   postSchema,
   productSchema,
   categorySchema,
+  getSchemaForType,
   validate
 } from './index'
+import { getSchemaFields } from './schema-org'
 
 describe('SEO Schema', () => {
   it('validates correct SEO data', () => {
@@ -161,5 +166,49 @@ describe('Category Schema', () => {
     }
     const result = validate(categorySchema, data)
     expect(result.success).toBe(true)
+  })
+})
+
+describe('Schema Registry', () => {
+  const getSettingsSchemaTypes = () => {
+    const settingsPath = path.join(process.cwd(), 'content/settings.yml')
+    if (!fs.existsSync(settingsPath)) return []
+    const raw = fs.readFileSync(settingsPath, 'utf8')
+    const config = (yaml.load(raw) as Record<string, any>) || {}
+    const collections = Array.isArray(config.collections) ? config.collections : []
+    const singles = Array.isArray(config.singles) ? config.singles : []
+    return [...collections, ...singles]
+      .map((entry) => entry?.schemaType)
+      .filter((value): value is string => typeof value === 'string')
+  }
+
+  it('maps schema types used in settings.yml', () => {
+    const schemaTypes = getSettingsSchemaTypes()
+    if (!schemaTypes.length) return
+
+    for (const schemaType of schemaTypes) {
+      const schema = getSchemaForType(schemaType as any)
+      expect(schema).not.toBeNull()
+    }
+  })
+
+  it('keeps CMS fields aligned with schema definitions', () => {
+    const getSchemaKeys = (schema: any) => {
+      const shape = typeof schema?._def?.shape === 'function' ? schema._def.shape() : null
+      return shape ? Object.keys(shape) : []
+    }
+
+    const schemaTypes = getSettingsSchemaTypes()
+    if (!schemaTypes.length) return
+
+    for (const schemaType of schemaTypes) {
+      const schema = getSchemaForType(schemaType as any)
+      if (!schema) continue
+      const keys = getSchemaKeys(schema)
+      const fields = getSchemaFields(schemaType as any)
+      for (const field of fields) {
+        expect(keys).toContain(field.name)
+      }
+    }
   })
 })

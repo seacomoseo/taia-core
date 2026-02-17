@@ -36,15 +36,17 @@ export type SchemaOrgType = z.infer<typeof SchemaOrgType>
 
 export interface CMSField {
   name: string
-  label: string
+  label: string | Record<string, string>
   widget: string
   required?: boolean
   default?: any
   fields?: CMSField[]
   options?: any
-  hint?: string
+  hint?: string | Record<string, string>
+  label_singular?: string | Record<string, string>
   pattern?: string[]
   multiple?: boolean
+  allow_add?: boolean
   i18n?: boolean | 'duplicate'
   collection?: string
   search_fields?: string[]
@@ -62,25 +64,26 @@ export interface CMSField {
  */
 export function getSchemaFields (type: SchemaOrgType): CMSField[] {
   const baseFields: CMSField[] = [
-    { name: 'slug', label: 'Slug', widget: 'string', required: false, hint: 'Si vacío, se infiere del nombre del archivo', i18n: 'duplicate' },
-    { name: 'title', label: 'Título', widget: 'string', required: true, i18n: true },
-    { name: 'description', label: 'Descripción Corta', widget: 'text', required: true, hint: 'Usado para meta description', i18n: true },
-    { name: 'image', label: 'Imagen Destacada', widget: 'image', required: false, i18n: 'duplicate' },
-    { name: 'imageAlt', label: 'Alt de Imagen', widget: 'string', required: false, i18n: true }
+    { name: 'slug', label: 'slug', widget: 'string', required: true, hint: 'slug', i18n: true },
+    { name: 'title', label: 'title', widget: 'string', required: true, i18n: true },
+    { name: 'description', label: 'description', widget: 'text', required: false, hint: 'description', i18n: true },
+    { name: 'image', label: 'image', widget: 'image', required: false, i18n: 'duplicate' },
+    { name: 'imageAlt', label: 'imageAlt', widget: 'string', required: false, i18n: true }
   ]
 
   const seoFields: CMSField = {
     name: 'seo',
-    label: 'SEO Avanzado',
+    label: 'seo',
+    hint: 'seo',
     widget: 'object',
     collapsed: true,
     required: false,
     i18n: true,
     fields: [
-      { name: 'title', label: 'Meta Title', widget: 'string', hint: 'Si vacío, usa el título principal', required: false, i18n: true },
-      { name: 'description', label: 'Meta Description', widget: 'text', hint: 'Si vacío, usa la descripción principal', required: false, i18n: true },
-      { name: 'canonical', label: 'Canonical URL', widget: 'string', required: false, i18n: 'duplicate' },
-      { name: 'noindex', label: 'No Index', widget: 'boolean', default: false, required: false, i18n: 'duplicate' }
+      { name: 'title', label: 'title', widget: 'string', hint: 'seoTitle', required: false, i18n: true },
+      { name: 'description', label: 'description', widget: 'text', hint: 'seoDescription', required: false, i18n: true },
+      { name: 'canonical', label: 'canonical', widget: 'string', required: false, i18n: 'duplicate' },
+      { name: 'noindex', label: 'noindex', widget: 'boolean', default: false, required: false, i18n: 'duplicate' }
     ]
   }
 
@@ -93,139 +96,139 @@ export function getSchemaFields (type: SchemaOrgType): CMSField[] {
     case 'NewsArticle':
       return [
         ...commonFisrt,
-        { name: 'publishedAt', label: 'Fecha de Publicación', widget: 'datetime', required: true, i18n: 'duplicate' },
-        { name: 'modifiedAt', label: 'Fecha de Modificación', widget: 'datetime', required: false, i18n: 'duplicate' },
+        { name: 'publishedAt', label: 'publishedAt', widget: 'datetime', required: true, i18n: 'duplicate' },
+        { name: 'modifiedAt', label: 'modifiedAt', widget: 'datetime', required: false, i18n: 'duplicate' },
         ...commonLast
       ]
     case 'Product':
       return [
         ...commonFisrt,
-        { name: 'images', label: 'Imágenes', widget: 'image', multiple: true, required: false, i18n: 'duplicate' },
-        { name: 'price', label: 'Precio', widget: 'number', required: true, i18n: 'duplicate' },
-        { name: 'compareAtPrice', label: 'Precio Comparado', widget: 'number', required: false, i18n: 'duplicate' },
-        { name: 'sku', label: 'SKU', widget: 'string', i18n: 'duplicate' },
-        { name: 'brand', label: 'Marca', widget: 'string', i18n: 'duplicate' },
-        { name: 'gtin', label: 'GTIN', widget: 'string', required: false, i18n: 'duplicate' },
-        { name: 'inStock', label: 'En Stock', widget: 'boolean', default: true, i18n: 'duplicate' },
+        { name: 'images', label: 'images', widget: 'image', multiple: true, required: false, i18n: 'duplicate' },
+        { name: 'price', label: 'price', widget: 'number', required: true, i18n: 'duplicate' },
+        { name: 'compareAtPrice', label: 'compareAtPrice', widget: 'number', required: false, i18n: 'duplicate' },
+        { name: 'sku', label: 'sku', widget: 'string', i18n: 'duplicate' },
+        { name: 'brand', label: 'brand', widget: 'string', i18n: 'duplicate' },
+        { name: 'gtin', label: 'gtin', widget: 'string', required: false, i18n: 'duplicate' },
+        { name: 'inStock', label: 'inStock', widget: 'boolean', default: true, i18n: 'duplicate' },
         ...commonLast
       ]
     case 'Service':
       return [
         ...commonFisrt,
-        { name: 'provider', label: 'Proveedor', widget: 'string', i18n: 'duplicate' },
-        { name: 'areaServed', label: 'Área de Servicio', widget: 'string', i18n: true },
-        { name: 'serviceType', label: 'Tipo de Servicio', widget: 'string', i18n: true },
-        { name: 'hoursAvailable', label: 'Horario Disponible', widget: 'string', required: false, i18n: 'duplicate' },
+        { name: 'provider', label: 'provider', widget: 'string', i18n: 'duplicate' },
+        { name: 'areaServed', label: 'areaServed', widget: 'string', i18n: true },
+        { name: 'serviceType', label: 'serviceType', widget: 'string', i18n: true },
+        { name: 'hoursAvailable', label: 'hoursAvailable', widget: 'string', required: false, i18n: 'duplicate' },
         ...commonLast
       ]
     case 'Person':
       return [
         ...commonFisrt,
-        { name: 'jobTitle', label: 'Cargo', widget: 'string', i18n: true },
-        { name: 'email', label: 'Email', widget: 'string', i18n: 'duplicate' },
-        { name: 'telephone', label: 'Teléfono', widget: 'string', i18n: 'duplicate' },
-        { name: 'sameAs', label: 'Perfiles Sociales', widget: 'list', required: false, i18n: 'duplicate', fields: [{ name: 'url', label: 'URL', widget: 'string', i18n: 'duplicate' }] },
+        { name: 'jobTitle', label: 'jobTitle', widget: 'string', i18n: true },
+        { name: 'email', label: 'email', widget: 'string', i18n: 'duplicate' },
+        { name: 'telephone', label: 'telephone', widget: 'string', i18n: 'duplicate' },
+        { name: 'sameAs', label: 'sameAs', widget: 'list', required: false, i18n: 'duplicate', fields: [{ name: 'url', label: 'url', widget: 'string', i18n: 'duplicate' }] },
         ...commonLast
       ]
     case 'LocalBusiness':
     case 'Restaurant':
       return [
         ...commonFisrt,
-        { name: 'images', label: 'Imágenes', widget: 'image', multiple: true, required: false, i18n: 'duplicate' },
-        { name: 'address', label: 'Dirección', widget: 'string', i18n: true },
-        { name: 'telephone', label: 'Teléfono', widget: 'string', i18n: 'duplicate' },
-        { name: 'priceRange', label: 'Rango de Precios', widget: 'string', i18n: 'duplicate' },
-        { name: 'openingHours', label: 'Horario', widget: 'string', i18n: 'duplicate' },
-        { name: 'geo', label: 'Coordenadas', widget: 'object', required: false, i18n: 'duplicate', fields: [
-          { name: 'latitude', label: 'Latitud', widget: 'number', i18n: 'duplicate' },
-          { name: 'longitude', label: 'Longitud', widget: 'number', i18n: 'duplicate' }
+        { name: 'images', label: 'images', widget: 'image', multiple: true, required: false, i18n: 'duplicate' },
+        { name: 'address', label: 'address', widget: 'string', i18n: true },
+        { name: 'telephone', label: 'telephone', widget: 'string', i18n: 'duplicate' },
+        { name: 'priceRange', label: 'priceRange', widget: 'string', i18n: 'duplicate' },
+        { name: 'openingHours', label: 'openingHours', widget: 'string', i18n: 'duplicate' },
+        { name: 'geo', label: 'geo', widget: 'object', required: false, i18n: 'duplicate', fields: [
+          { name: 'latitude', label: 'latitude', widget: 'number', i18n: 'duplicate' },
+          { name: 'longitude', label: 'longitude', widget: 'number', i18n: 'duplicate' }
         ] },
         ...commonLast
       ]
     case 'Organization':
       return [
         ...commonFisrt,
-        { name: 'images', label: 'Imágenes', widget: 'image', multiple: true, required: false, i18n: 'duplicate' },
-        { name: 'legalName', label: 'Nombre Legal', widget: 'string', required: false, i18n: 'duplicate' },
-        { name: 'url', label: 'URL', widget: 'string', required: false, i18n: 'duplicate' },
-        { name: 'logo', label: 'Logo', widget: 'image', required: false, i18n: 'duplicate' },
-        { name: 'sameAs', label: 'Perfiles Sociales', widget: 'list', required: false, i18n: 'duplicate', fields: [{ name: 'url', label: 'URL', widget: 'string', i18n: 'duplicate' }] },
+        { name: 'images', label: 'images', widget: 'image', multiple: true, required: false, i18n: 'duplicate' },
+        { name: 'legalName', label: 'legalName', widget: 'string', required: false, i18n: 'duplicate' },
+        { name: 'url', label: 'url', widget: 'string', required: false, i18n: 'duplicate' },
+        { name: 'logo', label: 'logo', widget: 'image', required: false, i18n: 'duplicate' },
+        { name: 'sameAs', label: 'sameAs', widget: 'list', required: false, i18n: 'duplicate', fields: [{ name: 'url', label: 'url', widget: 'string', i18n: 'duplicate' }] },
         ...commonLast
       ]
     case 'Event':
       return [
         ...commonFisrt,
-        { name: 'startDate', label: 'Fecha de Inicio', widget: 'datetime', required: true, i18n: 'duplicate' },
-        { name: 'endDate', label: 'Fecha de Fin', widget: 'datetime', required: false, i18n: 'duplicate' },
-        { name: 'location', label: 'Ubicación', widget: 'string', i18n: true },
-        { name: 'eventStatus', label: 'Estado del Evento', widget: 'string', required: false, i18n: 'duplicate' },
+        { name: 'startDate', label: 'startDate', widget: 'datetime', required: true, i18n: 'duplicate' },
+        { name: 'endDate', label: 'endDate', widget: 'datetime', required: false, i18n: 'duplicate' },
+        { name: 'location', label: 'location', widget: 'string', i18n: true },
+        { name: 'eventStatus', label: 'eventStatus', widget: 'string', required: false, i18n: 'duplicate' },
         ...commonLast
       ]
     case 'FAQPage':
       return [
         ...commonFisrt,
-        { name: 'questions', label: 'Preguntas', widget: 'list', i18n: true, fields: [
-          { name: 'question', label: 'Pregunta', widget: 'string', i18n: true },
-          { name: 'answer', label: 'Respuesta', widget: 'text', i18n: true }
+        { name: 'questions', label: 'questions', widget: 'list', i18n: true, fields: [
+          { name: 'question', label: 'question', widget: 'string', i18n: true },
+          { name: 'answer', label: 'answer', widget: 'text', i18n: true }
         ] },
         ...commonLast
       ]
     case 'HowTo':
       return [
         ...commonFisrt,
-        { name: 'steps', label: 'Pasos', widget: 'list', i18n: true, fields: [
-          { name: 'name', label: 'Paso', widget: 'string', i18n: true },
-          { name: 'text', label: 'Descripción', widget: 'text', i18n: true }
+        { name: 'steps', label: 'steps', widget: 'list', i18n: true, fields: [
+          { name: 'name', label: 'name', widget: 'string', i18n: true },
+          { name: 'text', label: 'text', widget: 'text', i18n: true }
         ] },
         ...commonLast
       ]
     case 'Review':
       return [
         ...commonFisrt,
-        { name: 'itemReviewed', label: 'Elemento Evaluado', widget: 'string', i18n: true },
-        { name: 'reviewRating', label: 'Puntuación', widget: 'number', i18n: 'duplicate' },
-        { name: 'reviewBody', label: 'Reseña', widget: 'text', i18n: true },
+        { name: 'itemReviewed', label: 'itemReviewed', widget: 'string', i18n: true },
+        { name: 'reviewRating', label: 'reviewRating', widget: 'number', i18n: 'duplicate' },
+        { name: 'reviewBody', label: 'reviewBody', widget: 'text', i18n: true },
         ...commonLast
       ]
     case 'AggregateRating':
       return [
         ...commonFisrt,
-        { name: 'ratingValue', label: 'Valoración', widget: 'number', i18n: 'duplicate' },
-        { name: 'reviewCount', label: 'Número de Reseñas', widget: 'number', i18n: 'duplicate' },
+        { name: 'ratingValue', label: 'ratingValue', widget: 'number', i18n: 'duplicate' },
+        { name: 'reviewCount', label: 'reviewCount', widget: 'number', i18n: 'duplicate' },
         ...commonLast
       ]
     case 'JobPosting':
       return [
         ...commonFisrt,
-        { name: 'employmentType', label: 'Tipo de Empleo', widget: 'string', i18n: 'duplicate' },
-        { name: 'jobLocation', label: 'Ubicación', widget: 'string', i18n: true },
-        { name: 'baseSalary', label: 'Salario Base', widget: 'string', required: false, i18n: 'duplicate' },
+        { name: 'employmentType', label: 'employmentType', widget: 'string', i18n: 'duplicate' },
+        { name: 'jobLocation', label: 'jobLocation', widget: 'string', i18n: true },
+        { name: 'baseSalary', label: 'baseSalary', widget: 'string', required: false, i18n: 'duplicate' },
         ...commonLast
       ]
     case 'Course':
       return [
         ...commonFisrt,
-        { name: 'provider', label: 'Proveedor', widget: 'string', i18n: 'duplicate' },
-        { name: 'educationalLevel', label: 'Nivel', widget: 'string', required: false, i18n: true },
+        { name: 'provider', label: 'provider', widget: 'string', i18n: 'duplicate' },
+        { name: 'educationalLevel', label: 'educationalLevel', widget: 'string', required: false, i18n: true },
         ...commonLast
       ]
     case 'WebSite':
       return [
         ...commonFisrt,
-        { name: 'image', label: 'Imagen Destacada', widget: 'image', required: false, i18n: 'duplicate' },
-        { name: 'imageAlt', label: 'Alt de Imagen', widget: 'string', required: false, i18n: true },
-        { name: 'url', label: 'URL', widget: 'string', required: false, i18n: 'duplicate' },
-        { name: 'potentialAction', label: 'Acción Potencial', widget: 'string', required: false, i18n: 'duplicate' },
+        { name: 'image', label: 'image', widget: 'image', required: false, i18n: 'duplicate' },
+        { name: 'imageAlt', label: 'imageAlt', widget: 'string', required: false, i18n: true },
+        { name: 'url', label: 'url', widget: 'string', required: false, i18n: 'duplicate' },
+        { name: 'potentialAction', label: 'potentialAction', widget: 'string', required: false, i18n: 'duplicate' },
         ...commonLast
       ]
     case 'ItemList':
       return [
         ...commonFisrt,
-        { name: 'image', label: 'Imagen Destacada', widget: 'image', required: false, i18n: 'duplicate' },
-        { name: 'imageAlt', label: 'Alt de Imagen', widget: 'string', required: false, i18n: true },
-        { name: 'itemListElement', label: 'Elementos', widget: 'list', i18n: true, fields: [
-          { name: 'name', label: 'Nombre', widget: 'string', i18n: true },
-          { name: 'url', label: 'URL', widget: 'string', required: false, i18n: 'duplicate' }
+        { name: 'image', label: 'image', widget: 'image', required: false, i18n: 'duplicate' },
+        { name: 'imageAlt', label: 'imageAlt', widget: 'string', required: false, i18n: true },
+        { name: 'itemListElement', label: 'itemListElement', widget: 'list', i18n: true, fields: [
+          { name: 'name', label: 'name', widget: 'string', i18n: true },
+          { name: 'url', label: 'url', widget: 'string', required: false, i18n: 'duplicate' }
         ] },
         ...commonLast
       ]

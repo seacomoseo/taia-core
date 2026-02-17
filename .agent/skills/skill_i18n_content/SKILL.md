@@ -28,7 +28,7 @@ Define and maintain multilingual content and translatable UI strings.
 
 ### Step 2: UI Strings
 
-- Add `content/i18n/<lang>.yml` files
+- Add `content/globals/<lang>.yml` files
 - Use consistent keys across languages
 - Store nav paths and labels per language
 
@@ -39,9 +39,15 @@ Define and maintain multilingual content and translatable UI strings.
 
 ## Outputs
 
-1. `content/i18n/<lang>.yml` - UI strings per language
-2. `content/<collection>/_index.<lang>.md` - Collection prefixes
-3. `content/<collection>/*.{lang}.md` - Localized entries
+1. `content/globals/<lang>.yml` - UI strings per language
+2. Use `cmsGlobals` exports in `*.astro` to describe lists/objects for CMS
+3. Use `cmsFields` exports in templates to add CMS fields tied to template logic
+4. `cmsGlobals`/`cmsFields` labels/hints are defined inline with `{ es, en }` objects (not in globals)
+5. Core CMS label/hint translations live in `core/src/cms/i18n/<lang>.yml` using field-name keys
+6. Lists should set `label_singular` (translated) when defined inline
+7. Fields default to `required: false` unless explicitly set `true`
+8. `content/<collection>/_index.<lang>.md` - Collection prefixes
+9. `content/<collection>/*.{lang}.md` - Localized entries
 
 ## Definition of Done
 

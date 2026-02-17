@@ -9,6 +9,7 @@ export const postSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   slug: z.string().min(1, 'Slug is required'),
   excerpt: z.string().max(300, 'Excerpt should be under 300 characters').optional(),
+  description: z.string().optional(),
   body: z.string().optional(),
 
   // SEO

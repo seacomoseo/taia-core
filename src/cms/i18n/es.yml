@@ -1,0 +1,114 @@
+labels:
+  slug: Slug
+  title: Título
+  description: Descripción
+  excerpt: Extracto
+  body: Contenido
+  author: Autor
+  canonical: URL canónica
+  noindex: No indexar
+  categories: Categorías
+  tags: Etiquetas
+  draft: Borrador
+  featured: Destacado
+  quantity: Cantidad
+  parent: Superior
+  order: Orden
+  updatedAt: Actualizado el
+  image: Imagen destacada
+  imageAlt: Alt de imagen
+  seo: SEO
+  publishedAt: Fecha de publicación
+  modifiedAt: Fecha de modificación
+  images: Imágenes
+  price: Precio
+  compareAtPrice: Precio comparado
+  sku: SKU
+  brand: Marca
+  gtin: GTIN
+  inStock: En stock
+  provider: Proveedor
+  educationalLevel: Nivel educativo
+  areaServed: Área de servicio
+  serviceType: Tipo de servicio
+  hoursAvailable: Horario disponible
+  jobTitle: Cargo
+  email: Email
+  phone: Teléfono
+  telephone: Teléfono
+  sameAs: Perfiles sociales
+  url: URL
+  address: Dirección
+  priceRange: Rango de precios
+  openingHours: Horario
+  geo: Coordenadas
+  latitude: Latitud
+  longitude: Longitud
+  legalName: Nombre legal
+  logo: Logo
+  startDate: Fecha de inicio
+  endDate: Fecha de fin
+  location: Ubicación
+  eventStatus: Estado del evento
+  questions: Preguntas
+  question: Pregunta
+  answer: Respuesta
+  steps: Pasos
+  name: Nombre
+  text: Descripción
+  itemReviewed: Elemento evaluado
+  reviewRating: Puntuación
+  reviewBody: Reseña
+  ratingValue: Valoración
+  reviewCount: Número de reseñas
+  employmentType: Tipo de empleo
+  jobLocation: Ubicación del empleo
+  baseSalary: Salario base
+  potentialAction: Acción potencial
+  itemListElement: Elementos
+  siteUrl: URL del sitio
+  siteName: Nombre del sitio
+  themeColor: Color del tema
+  backgroundColor: Color de fondo
+  currency: Moneda
+  faviconSource: Favicon
+  ga4Id: Google Analytics 4 ID
+  languages: Idiomas
+  lang: Idioma
+  cmsLocale: Idioma del CMS
+  collections: Colecciones
+  singles: Páginas individuales
+  single: Página individual
+  id: ID
+  label: Etiqueta
+  singular: Singular
+  icon: Icono
+  schemaType: Tipo Schema
+  template: Plantilla
+  taxonomyOf: Taxonomía de
+  collectionId: Colección
+  collection: Colección
+  code: Código
+hints:
+  slug: 'Estilo URL amigable, ej: "entrada-blog"'
+  description: Usado para meta description
+  seo: Campos avanzados de SEO
+  seoTitle: Si está vacío, usa el título principal
+  seoDescription: Si está vacío, usa la descripción principal
+  icon: "Nombre del icono, ej: home, article, storefront"
+  taxonomyOf: "IDs de colecciones relacionadas (ej: posts, products)"
+  siteUrl: https://example.com
+  faviconSource: "Ruta relativa, ej: public/favicon.svg"
+  ga4Id: G-XXXXXXXXXX
+  languages: Código de idioma [ISO-639-1](https://es.wikipedia.org/wiki/ISO_639-1) + Variante Regional opcional [ISO 3166-1](https://es.wikipedia.org/wiki/ISO_3166-1)
+collections:
+  settings: Configuración
+  templates: Plantillas
+  templates.singular: Plantilla
+  components: Componentes
+  components.singular: Componente
+  singles: Páginas individuales
+  globals: Textos globales
+files:
+  settings.general: General
+  settings.globals: Textos globales

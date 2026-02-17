@@ -8,6 +8,9 @@ export const pageSchema = z.object({
   // Content
   title: z.string().min(1, 'Title is required'),
   slug: z.string().min(1, 'Slug is required'),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  imageAlt: z.string().optional(),
   body: z.string().optional(),
 
   // SEO

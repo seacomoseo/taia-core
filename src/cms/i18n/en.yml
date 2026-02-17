@@ -1,0 +1,114 @@
+labels:
+  slug: Slug
+  title: Title
+  description: Description
+  excerpt: Excerpt
+  body: Content
+  author: Author
+  canonical: Canonical URL
+  noindex: No index
+  categories: Categories
+  tags: Tags
+  draft: Draft
+  featured: Featured
+  quantity: Quantity
+  parent: Parent
+  order: Order
+  updatedAt: Updated at
+  image: Featured image
+  imageAlt: Image alt text
+  seo: SEO
+  publishedAt: Publish date
+  modifiedAt: Modified date
+  images: Images
+  price: Price
+  compareAtPrice: Compare at price
+  sku: SKU
+  brand: Brand
+  gtin: GTIN
+  inStock: In stock
+  provider: Provider
+  educationalLevel: Educational level
+  areaServed: Service area
+  serviceType: Service type
+  hoursAvailable: Available hours
+  jobTitle: Job title
+  email: Email
+  phone: Phone
+  telephone: Phone
+  sameAs: Social profiles
+  url: URL
+  address: Address
+  priceRange: Price range
+  openingHours: Opening hours
+  geo: Coordinates
+  latitude: Latitude
+  longitude: Longitude
+  legalName: Legal name
+  logo: Logo
+  startDate: Start date
+  endDate: End date
+  location: Location
+  eventStatus: Event status
+  questions: Questions
+  question: Question
+  answer: Answer
+  steps: Steps
+  name: Name
+  text: Description
+  itemReviewed: Item reviewed
+  reviewRating: Rating
+  reviewBody: Review
+  ratingValue: Rating value
+  reviewCount: Review count
+  employmentType: Employment type
+  jobLocation: Job location
+  baseSalary: Base salary
+  potentialAction: Potential action
+  itemListElement: Items
+  siteUrl: Site URL
+  siteName: Site name
+  themeColor: Theme color
+  backgroundColor: Background color
+  currency: Currency
+  faviconSource: Favicon
+  ga4Id: Google Analytics 4 ID
+  languages: Languages
+  lang: Language
+  cmsLocale: CMS language
+  collections: Collections
+  singles: Single pages
+  single: Single page
+  id: ID
+  label: Label
+  singular: Singular
+  icon: Icon
+  schemaType: Schema type
+  template: Template
+  taxonomyOf: Taxonomy of
+  collectionId: Collection
+  collection: Collection
+  code: Code
+hints:
+  slug: If empty, inferred from the filename
+  description: Used for the meta description
+  seo: Advanced SEO fields
+  seoTitle: If empty, uses the main title
+  seoDescription: If empty, uses the main description
+  icon: "Icon name, e.g. home, article, storefront"
+  taxonomyOf: "Related collection IDs (e.g. posts, products)"
+  siteUrl: https://example.com
+  faviconSource: "Relative path, e.g. public/favicon.svg"
+  ga4Id: G-XXXXXXXXXX
+  languages: Language code [ISO-639-1](https://es.wikipedia.org/wiki/ISO_639-1) + optional regional variant [ISO 3166-1](https://es.wikipedia.org/wiki/ISO_3166-1)
+collections:
+  settings: Settings
+  templates: Templates
+  templates.singular: Template
+  components: Components
+  components.singular: Component
+  singles: Single pages
+  globals: Global texts
+files:
+  settings.general: General
+  settings.globals: Global texts

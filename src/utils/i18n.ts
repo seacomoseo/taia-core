@@ -8,7 +8,7 @@ export function getI18nBundle (lang: string, projectRoot = process.cwd()): Recor
   const cacheKey = `${projectRoot}:${lang}`
   if (cache.has(cacheKey)) return cache.get(cacheKey) as Record<string, any>
 
-  const filePath = path.join(projectRoot, 'content/i18n', `${lang}.yml`)
+  const filePath = path.join(projectRoot, 'content/globals', `${lang}.yml`)
   if (!fs.existsSync(filePath)) {
     cache.set(cacheKey, {})
     return {}

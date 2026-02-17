@@ -7,6 +7,7 @@ export { pageSchema, type Page } from './page'
 export { postSchema, type Post } from './post'
 export { productSchema, type Product } from './product'
 export { categorySchema, type Category } from './category'
+export { schemaRegistry, getSchemaForType } from './registry'
 
 export type ValidationResult<T> =
   | { success: true; data: T }
