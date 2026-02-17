@@ -2,6 +2,8 @@
 
 Reusable Astro foundation for high-performance, SEO-focused sites, used by the TAIA Pilot project.
 
+Base stack: Astro + Sveltia CMS + Tailwind CSS.
+
 ## What it provides
 
 - Base layouts and primitives (SEO, images, links, accessibility).

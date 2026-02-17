@@ -11,6 +11,13 @@ This file is the canonical source of truth for agent behavior across this projec
   - `../uploads/`
 - Core logic, reusable contracts, and system behavior live in `core/`.
 
+## Base Stack
+
+- Framework: Astro.
+- CMS: Sveltia CMS.
+- Styling: Tailwind CSS (via `@tailwindcss/vite`).
+- Prefer Tailwind utility classes in templates/components; use custom CSS only when utilities are insufficient.
+
 ## Instruction Precedence
 
 1. Direct user request
@@ -98,4 +105,5 @@ If instructions conflict, follow the higher level and document tradeoffs.
 - `core/AGENTS.md` is policy.
 - `core/agents/skills/*` are executable playbooks.
 - `core/docs/*` are reference rails and deep context.
+- `core/docs/IMPLEMENTATION_STACK.md` documents Astro + Sveltia + Tailwind setup details.
 - Update all affected layers when system behavior changes.

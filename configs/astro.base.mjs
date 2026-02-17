@@ -1,3 +1,5 @@
+import tailwindcss from '@tailwindcss/vite'
+
 /** @type {import('astro').AstroUserConfig} */
 const astroBaseConfig = {
   build: {
@@ -5,6 +7,7 @@ const astroBaseConfig = {
     inlineStylesheets: 'auto'
   },
   vite: {
+    plugins: [tailwindcss()],
     build: {
       cssMinify: true,
       minify: true

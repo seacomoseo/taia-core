@@ -22,12 +22,13 @@ Design and implement memorable interfaces with clear aesthetic direction.
 
 1. Choose a deliberate design direction and document intent.
 2. Define typography, color system, spacing, and interaction style.
-3. Implement production-ready code with responsive behavior.
+3. Implement production-ready code with responsive behavior using Tailwind CSS utilities first.
 4. Validate accessibility, readability, and performance.
 
 ## Quality Rules
 
 - Avoid default AI-looking aesthetics and repetitive layout clichés.
+- Prefer Tailwind classes before adding component-scoped CSS.
 - Use expressive typography and coherent color systems.
 - Use meaningful motion, not decorative noise.
 - Keep implementation faithful to the chosen direction.

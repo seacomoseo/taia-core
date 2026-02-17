@@ -31,6 +31,7 @@
 
 - `skill_site_architecture`
 - `skill_frontend_design`
+- `skill_astro_sveltia_tailwind`
 - `skill_cms_schema_generator`
 - `skill_i18n_content`
 - `skill_ecommerce_mvp`
