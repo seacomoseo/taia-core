@@ -76,55 +76,55 @@ const showPagination = totalPages > 1
 
   <slot name="header" />
 
-  <main id="main-content" class="flex-1">
+  <main id="main-content" class="flex-1 pb-16 md:pb-20">
     <SectionShell size="lg" padding="md">
-      <!-- Collection Header -->
-      <header class="mb-8 text-center">
+      <header class="taia-surface taia-fade-in mb-8 px-6 py-8 text-center md:px-10 md:py-10">
+        <span class="taia-kicker mx-auto mb-4">Archivo</span>
         {collectionTitle && (
-          <h1 class="mb-2 text-4xl font-bold leading-tight md:text-5xl">{collectionTitle}</h1>
+          <h1 class="taia-section-title mb-3 text-4xl text-balance md:text-5xl">{collectionTitle}</h1>
         )}
         {totalItems !== undefined && (
-          <p class="text-sm text-[var(--color-text-muted)]">
+          <p class="mx-auto max-w-xl text-sm text-[var(--color-text-muted)] md:text-base">
             {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </p>
         )}
 
-        <slot name="filters" />
+        <div class="mt-5">
+          <slot name="filters" />
+        </div>
       </header>
 
-      <!-- Collection Grid -->
-      <div class="mb-12 grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
+      <div class="mb-12 grid grid-cols-[repeat(auto-fill,minmax(270px,1fr))] gap-6 md:grid-cols-[repeat(auto-fill,minmax(320px,1fr))]">
         <slot />
       </div>
 
-      <!-- Pagination -->
       {showPagination && (
-        <nav class="flex items-center justify-center gap-6 border-t border-[var(--color-border)] pt-8" aria-label="Pagination">
+        <nav class="taia-surface flex items-center justify-center gap-3 px-5 py-4 md:gap-5 md:px-8" aria-label="Pagination">
           {prevPage
             ? (
-              <a href={prevPage} class="rounded-md px-4 py-2 font-medium transition-colors hover:bg-[var(--color-bg-alt)]">
-               ← Previous
+              <a href={prevPage} class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-bg-alt)] md:text-base">
+                ← Previous
               </a>
             )
             : (
-              <span class="cursor-not-allowed rounded-md px-4 py-2 font-medium opacity-50">
-               ← Previous
+              <span class="cursor-not-allowed rounded-full border border-[var(--color-border)] px-4 py-2 text-sm font-semibold opacity-45 md:text-base">
+                ← Previous
               </span>
             )}
 
-          <span class="text-sm text-[var(--color-text-muted)]">
+          <span class="text-sm font-medium text-[var(--color-text-muted)] md:text-base">
             Page {currentPage} of {totalPages}
           </span>
 
           {nextPage
             ? (
-              <a href={nextPage} class="rounded-md px-4 py-2 font-medium transition-colors hover:bg-[var(--color-bg-alt)]">
-               Next →
+              <a href={nextPage} class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-white/80 px-4 py-2 text-sm font-semibold transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-bg-alt)] md:text-base">
+                Next →
               </a>
             )
             : (
-              <span class="cursor-not-allowed rounded-md px-4 py-2 font-medium opacity-50">
-               Next →
+              <span class="cursor-not-allowed rounded-full border border-[var(--color-border)] px-4 py-2 text-sm font-semibold opacity-45 md:text-base">
+                Next →
               </span>
             )}
         </nav>

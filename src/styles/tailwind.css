@@ -1,1 +1,171 @@
 @import 'tailwindcss';
+
+:root {
+  --color-text: #172033;
+  --color-text-muted: #5d6982;
+  --color-text-on-dark: #f5f7ff;
+  --color-text-on-accent: #f6f8ff;
+  --color-bg: #f4f3ef;
+  --color-bg-alt: #e7e6e1;
+  --color-bg-dark: #0f2230;
+  --color-accent: #b0432f;
+  --color-accent-hover: #8f3322;
+  --color-focus: #1d56b0;
+  --color-border: #d4cfbf;
+  --color-border-strong: #a79f8a;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.85rem;
+  --radius-lg: 1.2rem;
+  --radius-xl: 1.8rem;
+  --shadow-soft: 0 20px 40px -30px rgba(15, 34, 48, 0.55);
+  --shadow-panel: 0 30px 60px -42px rgba(10, 20, 34, 0.48);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--color-text);
+  background: radial-gradient(circle at 10% 10%, rgba(211, 173, 120, 0.18), transparent 36%),
+    radial-gradient(circle at 90% 0%, rgba(29, 86, 176, 0.14), transparent 38%),
+    linear-gradient(180deg, #fcfbf7 0%, #efede6 100%);
+  font-family: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration-skip-ink: auto;
+}
+
+.taia-surface {
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.9), rgba(249, 246, 238, 0.82));
+  border: 1px solid rgba(167, 159, 138, 0.45);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(12px);
+}
+
+.taia-section-title {
+  font-family: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', serif;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.taia-kicker {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 9999px;
+  border: 1px solid rgba(176, 67, 47, 0.3);
+  background: rgba(176, 67, 47, 0.09);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7f2f20;
+}
+
+.taia-content {
+  color: var(--color-text);
+}
+
+.taia-content > * + * {
+  margin-top: 1.15rem;
+}
+
+.taia-content h2,
+.taia-content h3,
+.taia-content h4 {
+  font-family: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', serif;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.taia-content h2 {
+  margin-top: 2rem;
+  font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2rem);
+}
+
+.taia-content h3 {
+  margin-top: 1.6rem;
+  font-size: clamp(1.3rem, 1.05rem + 0.5vw, 1.55rem);
+}
+
+.taia-content p,
+.taia-content li {
+  color: #2f3a4f;
+}
+
+.taia-content ul,
+.taia-content ol {
+  padding-left: 1.2rem;
+}
+
+.taia-content a {
+  color: #8f3322;
+  text-decoration: underline;
+  text-decoration-color: rgba(176, 67, 47, 0.45);
+  text-underline-offset: 0.15em;
+}
+
+.taia-content blockquote {
+  border-left: 3px solid rgba(176, 67, 47, 0.5);
+  margin: 1.75rem 0;
+  padding: 0.25rem 0 0.25rem 1rem;
+  color: #4b556c;
+  font-style: italic;
+}
+
+.taia-fade-in {
+  animation: taia-rise 0.55s ease forwards;
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+.taia-fade-in-delay {
+  animation: taia-rise 0.65s ease 0.12s forwards;
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+@keyframes taia-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .taia-fade-in,
+  .taia-fade-in-delay {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
