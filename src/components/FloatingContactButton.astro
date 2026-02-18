@@ -1,0 +1,108 @@
+---
+interface ContactAction {
+  label: string
+  href: string
+  icon?: string
+}
+
+interface Props {
+  label?: string
+  icon?: string
+  actions: ContactAction[]
+  class?: string
+}
+
+const {
+  label = 'Contact',
+  icon = 'chat',
+  actions = [],
+  class: className
+} = Astro.props as Props
+---
+
+{actions.length > 0 && (
+  <aside class={['taia-floating-contact', className].filter(Boolean).join(' ')} data-floating-contact>
+    <button type='button' class='taia-floating-toggle' data-floating-toggle aria-label={label}>
+      <span class='material-symbols-rounded'>{icon}</span>
+    </button>
+
+    <ul class='taia-floating-menu' data-floating-menu>
+      {actions.map((action) => (
+        <li>
+          <a href={action.href} class='taia-floating-link' target={action.href.startsWith('http') ? '_blank' : undefined} rel={action.href.startsWith('http') ? 'noopener noreferrer' : undefined}>
+            {action.icon && <span class='material-symbols-rounded'>{action.icon}</span>}
+            <span>{action.label}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}
+
+<script is:inline>
+  if (typeof window !== 'undefined' && !window.__taiaFloatingContactInit) {
+    window.__taiaFloatingContactInit = true
+    document.querySelectorAll('[data-floating-contact]').forEach((container) => {
+      const toggle = container.querySelector('[data-floating-toggle]')
+      const menu = container.querySelector('[data-floating-menu]')
+      if (!toggle || !menu) return
+      toggle.addEventListener('click', () => {
+        const expanded = menu.classList.toggle('is-open')
+        toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false')
+      })
+    })
+  }
+</script>
+
+<style>
+  .taia-floating-contact {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 120;
+  }
+
+  .taia-floating-toggle {
+    width: 3.1rem;
+    height: 3.1rem;
+    border-radius: 9999px;
+    border: 0;
+    background: linear-gradient(150deg, #b0432f, #8f3322);
+    color: #fff;
+    box-shadow: 0 20px 40px -26px rgba(9, 19, 34, 0.7);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .taia-floating-menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    right: 0;
+    bottom: 3.6rem;
+    display: none;
+    width: max-content;
+    min-width: 12rem;
+    gap: 0.4rem;
+  }
+
+  .taia-floating-menu.is-open {
+    display: grid;
+  }
+
+  .taia-floating-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #fff;
+    border: 1px solid var(--color-border, #d4cfbf);
+    border-radius: 9999px;
+    padding: 0.5rem 0.85rem;
+    text-decoration: none;
+    color: var(--color-text, #172033);
+    box-shadow: 0 20px 35px -30px rgba(9, 19, 34, 0.55);
+  }
+</style>

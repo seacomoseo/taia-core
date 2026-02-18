@@ -89,6 +89,16 @@ labels:
   collectionId: Collection
   collection: Collection
   code: Code
+  colors: Colors
+  typography: Typography
+  accent: Accent
+  background: Background
+  heading: Heading
+  redirects: Redirects
+  redirect: Redirect
+  from: From
+  to: To
+  type: Type
 hints:
   slug: If empty, inferred from the filename
   description: Used for the meta description
@@ -114,3 +124,7 @@ collections:
 files:
   settings.general: General
   settings.globals: Global Texts
+  settings.styles: Styles
+  settings.redirects: Redirects
+  settings.robots: robots.txt
+  settings.llms: llms.txt

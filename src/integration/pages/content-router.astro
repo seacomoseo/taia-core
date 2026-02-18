@@ -183,7 +183,7 @@ if (!entry) {
   return new Response('Not found', { status: 404 })
 }
 
-const { Content } = await render(entry)
+const { Content, headings = [] } = await render(entry)
 
 const projectLayouts = import.meta.glob('/layouts/*.astro', { eager: true }) as Record<string, { default: any }>
 const coreLayouts = import.meta.glob('/core/src/layouts/*.astro', { eager: true }) as Record<string, { default: any }>
@@ -195,6 +195,6 @@ if (!TemplateComponent) {
 }
 ---
 
-<TemplateComponent entry={entry} lang={lang} collectionId={collectionId} items={collectionItems}>
+<TemplateComponent entry={entry} lang={lang} collectionId={collectionId} items={collectionItems} headings={headings}>
   <Content />
 </TemplateComponent>

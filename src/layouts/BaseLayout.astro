@@ -51,11 +51,21 @@ const {
 const htmlLang = locale.split('_')[0]
 const configService = new ConfigService(process.cwd())
 const taiaConfig = configService.getTaiaConfig()
+const stylesConfig = configService.getStylesConfig()
 const resolvedGa4Id = ga4Id || taiaConfig.ga4Id
 const resolvedSiteName = siteName || taiaConfig.siteName || 'TAIA'
 const faviconSource = taiaConfig.faviconSource || ''
 const hasSvgFavicon = faviconSource.endsWith('.svg')
 const baseBodyClass = 'min-h-screen text-[var(--color-text)] antialiased'
+const isProd = import.meta.env.PROD
+
+const runtimeCssVars: string[] = []
+if (stylesConfig.colors?.accent) runtimeCssVars.push(`--color-accent:${stylesConfig.colors.accent};--color-accent-hover:${stylesConfig.colors.accent};`)
+if (stylesConfig.colors?.text) runtimeCssVars.push(`--color-text:${stylesConfig.colors.text};`)
+if (stylesConfig.colors?.background) runtimeCssVars.push(`--color-bg:${stylesConfig.colors.background};`)
+if (stylesConfig.typography?.heading) runtimeCssVars.push(`--taia-font-heading:${stylesConfig.typography.heading};`)
+if (stylesConfig.typography?.body) runtimeCssVars.push(`--taia-font-body:${stylesConfig.typography.body};`)
+const runtimeCssVarBlock = runtimeCssVars.length > 0 ? `:root{${runtimeCssVars.join('')}}` : ''
 ---
 
 <!DOCTYPE html>
@@ -95,10 +105,12 @@ const baseBodyClass = 'min-h-screen text-[var(--color-text)] antialiased'
 
     <FocusOutlines />
 
-    {resolvedGa4Id && (
+    {runtimeCssVarBlock && <style is:inline set:html={runtimeCssVarBlock} />}
+
+    {resolvedGa4Id && isProd && (
       <script async src={`https://www.googletagmanager.com/gtag/js?id=${resolvedGa4Id}`}></script>
     )}
-    {resolvedGa4Id && (
+    {resolvedGa4Id && isProd && (
       <script
         is:inline
         set:html={`window.dataLayer = window.dataLayer || [];
@@ -107,6 +119,51 @@ gtag('js', new Date());
 gtag('config', '${resolvedGa4Id}');`}
       />
     )}
+
+    <script
+      is:inline
+      set:html={`(function(){
+  var isProd = ${JSON.stringify(isProd)};
+  function inferType(label){
+    if (!label) return 'custom';
+    var value = String(label);
+    if (/^tel:/.test(value)) return 'phone';
+    if (/^mailto:/.test(value)) return 'email_send';
+    if (/wa\.me\/|api\.whatsapp\.com\/send\/?/.test(value)) return 'whatsapp';
+    if (/maps\.app\.goo\.gl|google\.[^/]+\/maps|maps\.apple\.com|bing\.com\/maps|openstreetmap\.org/.test(value)) return 'address';
+    return 'custom';
+  }
+
+  function emit(payload){
+    if (!payload || !payload.type) return;
+    if (!payload.id) payload.id = 'global';
+    if (!payload.label) payload.label = '';
+    if (!isProd || typeof window.gtag !== 'function') {
+      console.info('[GA4 contact]', payload);
+      return;
+    }
+    window.gtag('event', 'contact', payload);
+  }
+
+  window.taiaTrackContact = emit;
+
+  document.addEventListener('taia:contact', function(event){
+    emit(event.detail || {});
+  });
+
+  document.addEventListener('click', function(event){
+    var trigger = event.target && event.target.closest ? event.target.closest('[data-contact-track]') : null;
+    if (!trigger) return;
+    if (trigger.getAttribute('data-contact-manual') === 'true') return;
+    var href = trigger.getAttribute('href') || trigger.getAttribute('data-contact-label') || '';
+    emit({
+      id: (trigger.closest('[id]') && trigger.closest('[id]').id) || 'global',
+      type: trigger.getAttribute('data-contact-type') || inferType(href),
+      label: href
+    });
+  });
+})();`}
+    />
 
     <slot name='head' />
   </head>

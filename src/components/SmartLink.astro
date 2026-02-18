@@ -9,6 +9,11 @@ interface Props {
   target?: string
   prefetch?: boolean | 'hover' | 'viewport' | 'load'
   class?: string
+  obfuscate?: boolean
+  appearance?: 'text' | 'button' | 'ghost' | 'dot'
+  icon?: string
+  emailActions?: boolean
+  title?: string
   'aria-label'?: string
   'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time' | 'true' | 'false' | boolean | undefined | null
 }
@@ -19,6 +24,11 @@ const {
   target: customTarget,
   prefetch = true,
   class: className,
+  obfuscate = false,
+  appearance = 'text',
+  icon,
+  emailActions = true,
+  title,
   'aria-label': ariaLabel,
   'aria-current': ariaCurrent
 } = Astro.props
@@ -70,22 +80,173 @@ const prefetchValue = computePrefetch()
 // Check if current page
 const currentPath = Astro.url.pathname
 const isCurrentPage = !isExternal && href === currentPath
+
+const hasEmailUi = emailActions && isMailto
+
+const encodedPayload = Buffer.from(
+  JSON.stringify({ href, rel, target })
+).toString('base64').split('').reverse().join('')
+
+const appearanceClass = {
+  text: '',
+  button: 'inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white/85 px-4 py-2 font-semibold transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]',
+  ghost: 'inline-flex items-center gap-2 rounded-full px-3 py-2 font-semibold transition-colors hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-accent)]',
+  dot: 'inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-border)] bg-white/85 transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]'
+}[appearance]
+
+const classes = [appearanceClass, className].filter(Boolean).join(' ')
 ---
 
-<a
-  href={href}
-  rel={rel}
-  target={target}
-  class={className}
-  aria-label={ariaLabel}
-  aria-current={ariaCurrent ?? (isCurrentPage ? 'page' : undefined)}
-  data-astro-prefetch={prefetchValue}
->
-  <slot />
-  {isExternal && (
-    <span class="sr-only">(opens in new tab)</span>
-  )}
-</a>
+{obfuscate
+  ? (
+    <button
+      type='button'
+      class={classes}
+      aria-label={ariaLabel}
+      aria-current={ariaCurrent ?? (isCurrentPage ? 'page' : undefined)}
+      title={title}
+      data-obfuscated-link={encodedPayload}
+      data-email-actions={hasEmailUi ? 'true' : undefined}
+      data-link-title={title || ariaLabel || ''}
+      data-contact-track
+      data-contact-label={obfuscate ? undefined : href}
+      data-contact-manual='true'
+    >
+      {icon && <span class='material-symbols-rounded taia-icon' aria-hidden='true'>{icon}</span>}
+      <slot />
+    </button>
+    )
+  : (
+    <a
+      href={href}
+      rel={rel}
+      target={target}
+      class={classes}
+      aria-label={ariaLabel}
+      aria-current={ariaCurrent ?? (isCurrentPage ? 'page' : undefined)}
+      data-astro-prefetch={prefetchValue}
+      title={title}
+      data-contact-track
+      data-contact-label={href}
+    >
+      {icon && <span class='material-symbols-rounded taia-icon' aria-hidden='true'>{icon}</span>}
+      <slot />
+      {isExternal && (
+        <span class='sr-only'>(opens in new tab)</span>
+      )}
+    </a>
+    )}
+
+<script is:inline>
+  if (typeof window !== 'undefined' && !window.__taiaSmartLinkInit) {
+    window.__taiaSmartLinkInit = true
+
+    const decodePayload = (payload) => {
+      try {
+        const raw = atob(payload.split('').reverse().join(''))
+        return JSON.parse(raw)
+      } catch {
+        return null
+      }
+    }
+
+    const emitContact = (payload) => {
+      document.dispatchEvent(new CustomEvent('taia:contact', { detail: payload }))
+    }
+
+    const inferType = (label) => {
+      if (!label) return 'custom'
+      if (/^tel:/.test(label)) return 'phone'
+      if (/^mailto:/.test(label)) return 'email_send'
+      if (/wa\.me\/|api\.whatsapp\.com\/send\/?/.test(label)) return 'whatsapp'
+      if (/maps\.app\.goo\.gl|google\.[^/]+\/maps|maps\.apple\.com|bing\.com\/maps|openstreetmap\.org/.test(label)) return 'address'
+      return 'custom'
+    }
+
+    const openLink = (payload, trigger) => {
+      if (!payload?.href) return
+      const href = payload.href
+      emitContact({
+        id: (trigger?.closest?.('[id]')?.id) || 'global',
+        type: inferType(href),
+        label: href
+      })
+      const target = payload.target
+      if (target === '_blank') {
+        window.open(href, '_blank', 'noopener,noreferrer')
+        return
+      }
+      window.location.href = href
+    }
+
+    const ensureDialog = () => {
+      let dialog = document.getElementById('taia-email-dialog')
+      if (dialog) return dialog
+
+      dialog = document.createElement('dialog')
+      dialog.id = 'taia-email-dialog'
+      dialog.className = 'taia-email-dialog'
+      dialog.innerHTML = `
+        <div class="taia-email-panel">
+          <p class="taia-email-title">Email</p>
+          <p class="taia-email-value" id="taia-email-value"></p>
+          <div class="taia-email-actions">
+            <button type="button" data-email-copy>Copy</button>
+            <button type="button" data-email-send>Send</button>
+          </div>
+        </div>
+      `
+      document.body.appendChild(dialog)
+      return dialog
+    }
+
+    const dialog = ensureDialog()
+    const emailValue = dialog?.querySelector('#taia-email-value')
+    const copyButton = dialog?.querySelector('[data-email-copy]')
+    const sendButton = dialog?.querySelector('[data-email-send]')
+    let currentEmail = ''
+
+    copyButton?.addEventListener('click', async () => {
+      if (!currentEmail) return
+      try {
+        await navigator.clipboard.writeText(currentEmail)
+        emitContact({ id: 'email', type: 'email_copy', label: currentEmail })
+        copyButton.textContent = 'Copied'
+        window.setTimeout(() => {
+          copyButton.textContent = 'Copy'
+        }, 1200)
+      } catch {}
+    })
+
+    sendButton?.addEventListener('click', () => {
+      if (!currentEmail) return
+      emitContact({ id: 'email', type: 'email_send', label: currentEmail })
+      window.location.href = `mailto:${currentEmail}`
+      dialog?.close()
+    })
+
+    dialog?.addEventListener('click', (event) => {
+      const target = event.target
+      if (target === dialog) dialog.close()
+    })
+
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-obfuscated-link]')
+      if (!trigger) return
+      const payload = decodePayload(trigger.getAttribute('data-obfuscated-link') || '')
+      if (!payload?.href) return
+
+      if (trigger.getAttribute('data-email-actions') === 'true' && payload.href.startsWith('mailto:')) {
+        currentEmail = payload.href.replace(/^mailto:/, '')
+        if (emailValue) emailValue.textContent = currentEmail
+        dialog?.showModal()
+        return
+      }
+
+      openLink(payload, trigger)
+    })
+  }
+</script>
 
 <style>
   .sr-only {
@@ -98,5 +259,52 @@ const isCurrentPage = !isExternal && href === currentPath
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+  }
+
+  .taia-icon {
+    font-size: 1.1em;
+    line-height: 1;
+  }
+
+  .taia-email-dialog {
+    width: min(26rem, calc(100vw - 2rem));
+    border: 1px solid rgba(167, 159, 138, 0.5);
+    border-radius: 1rem;
+    padding: 0;
+    box-shadow: 0 30px 60px -35px rgba(10, 20, 34, 0.55);
+  }
+
+  .taia-email-dialog::backdrop {
+    background: rgba(8, 16, 28, 0.45);
+    backdrop-filter: blur(3px);
+  }
+
+  .taia-email-panel {
+    padding: 1rem;
+  }
+
+  .taia-email-title {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .taia-email-value {
+    margin: 0.4rem 0 0.9rem;
+    color: var(--color-text-muted, #5d6982);
+    word-break: break-all;
+  }
+
+  .taia-email-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .taia-email-actions button {
+    border: 1px solid var(--color-border, #d4cfbf);
+    border-radius: 9999px;
+    background: #fff;
+    padding: 0.45rem 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
   }
 </style>

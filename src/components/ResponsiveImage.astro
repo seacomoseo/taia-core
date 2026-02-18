@@ -1,8 +1,4 @@
 ---
-/**
- * ResponsiveImage - Optimized image component
- * Handles srcset, lazy loading, width/height for CLS, decoding
- */
 interface Props {
   src: string
   alt: string
@@ -10,9 +6,12 @@ interface Props {
   height: number
   sizes?: string
   srcset?: string
+  avifSrcset?: string
+  widths?: number[]
   loading?: 'lazy' | 'eager'
   decoding?: 'async' | 'sync' | 'auto'
   fetchpriority?: 'high' | 'low' | 'auto'
+  schemaCaption?: string
   class?: string
 }
 
@@ -23,41 +22,64 @@ const {
   height,
   sizes = '100vw',
   srcset,
+  avifSrcset,
+  widths = [480, 768, 1024, 1440],
   loading = 'lazy',
   decoding = 'async',
   fetchpriority = 'auto',
+  schemaCaption,
   class: className
-} = Astro.props
+} = Astro.props as Props
 
-// Generate srcset if not provided and src looks like a resizable path
-const generateSrcset = (_baseSrc: string): string | undefined => {
-  // Only generate for local images without existing srcset
-  if (srcset || _baseSrc.startsWith('http') || _baseSrc.startsWith('data:')) {
-    return srcset
-  }
+const isRemote = src.startsWith('http://') || src.startsWith('https://') || src.startsWith('//')
+const isData = src.startsWith('data:')
 
-  // Return undefined - let build tool handle srcset generation
-  // This is a placeholder for Astro Image optimization
-  return undefined
+const buildImageEndpoint = (format: 'avif' | 'webp' | 'png' | 'jpeg', targetWidth: number): string => {
+  const href = encodeURIComponent(src)
+  return `/_image?href=${href}&w=${targetWidth}&f=${format}`
 }
 
-const computedSrcset = generateSrcset(src)
+const makeSrcset = (format: 'avif' | 'webp' | 'png' | 'jpeg'): string | undefined => {
+  if (isRemote || isData) return undefined
+  return widths.map((value) => `${buildImageEndpoint(format, value)} ${value}w`).join(', ')
+}
+
+const resolvedAvifSrcset = avifSrcset || makeSrcset('avif')
+const resolvedFallbackSrcset = srcset || makeSrcset('webp')
+const fallbackSrc = !isRemote && !isData ? buildImageEndpoint('webp', width) : src
+
+const schemaJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ImageObject',
+  contentUrl: src,
+  width,
+  height,
+  caption: schemaCaption || alt,
+  description: alt
+}
 ---
 
-<img
-  src={src}
-  alt={alt}
-  width={width}
-  height={height}
-  sizes={computedSrcset ? sizes : undefined}
-  srcset={computedSrcset}
-  loading={loading}
-  decoding={decoding}
-  fetchpriority={fetchpriority}
-  class={className}
-/>
+<picture>
+  {resolvedAvifSrcset && <source type='image/avif' srcset={resolvedAvifSrcset} sizes={sizes} />}
+  {resolvedFallbackSrcset && <source type='image/webp' srcset={resolvedFallbackSrcset} sizes={sizes} />}
+  <img
+    src={fallbackSrc}
+    alt={alt}
+    width={width}
+    height={height}
+    sizes={resolvedFallbackSrcset || resolvedAvifSrcset ? sizes : undefined}
+    srcset={resolvedFallbackSrcset}
+    loading={loading}
+    decoding={decoding}
+    fetchpriority={fetchpriority}
+    class={className}
+  />
+</picture>
+
+<script is:inline type='application/ld+json' set:html={JSON.stringify(schemaJsonLd)} />
 
 <style>
+  picture,
   img {
     max-width: 100%;
     height: auto;

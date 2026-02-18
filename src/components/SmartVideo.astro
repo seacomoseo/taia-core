@@ -1,0 +1,145 @@
+---
+interface Props {
+  src: string
+  title: string
+  poster?: string
+  autoplay?: boolean
+  loop?: boolean
+  muted?: boolean
+  controls?: boolean
+  class?: string
+  withSchema?: boolean
+}
+
+const {
+  src,
+  title,
+  poster,
+  autoplay = false,
+  loop = false,
+  muted = true,
+  controls = true,
+  class: className,
+  withSchema = true
+} = Astro.props as Props
+
+const isYouTube = /(?:youtube\.com|youtu\.be)/.test(src)
+const isVimeo = /vimeo\.com/.test(src)
+const isExternalEmbed = isYouTube || isVimeo
+
+const youtubeId = isYouTube
+  ? (src.match(/(?:v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]{6,})/)?.[1] || '')
+  : ''
+
+const vimeoId = isVimeo
+  ? (src.match(/vimeo\.com\/(\d+)/)?.[1] || '')
+  : ''
+
+const embedSrc = isYouTube
+  ? `https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1`
+  : isVimeo
+    ? `https://player.vimeo.com/video/${vimeoId}`
+    : ''
+
+const fallbackPoster = poster || (youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : undefined)
+
+const schemaJsonLd = withSchema
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'VideoObject',
+      name: title,
+      description: title,
+      thumbnailUrl: fallbackPoster,
+      embedUrl: isExternalEmbed ? embedSrc : undefined,
+      contentUrl: !isExternalEmbed ? src : undefined
+    }
+  : null
+---
+
+<div class={['taia-video', className].filter(Boolean).join(' ')} data-smart-video>
+  {isExternalEmbed
+    ? (
+      <div class='taia-video-placeholder' data-video-placeholder data-embed={embedSrc} data-title={title} data-poster={fallbackPoster || ''}>
+        {fallbackPoster && <img src={fallbackPoster} alt={title} loading='lazy' decoding='async' />}
+        <button type='button' class='taia-video-play' aria-label={`Play ${title}`}>▶</button>
+      </div>
+      )
+    : (
+      <video
+        src={src}
+        title={title}
+        poster={poster}
+        controls={controls}
+        muted={muted}
+        autoplay={autoplay}
+        loop={loop}
+        playsinline
+      />
+      )}
+</div>
+
+{schemaJsonLd && <script is:inline type='application/ld+json' set:html={JSON.stringify(schemaJsonLd)} />}
+
+<script is:inline>
+  if (typeof window !== 'undefined' && !window.__taiaSmartVideoInit) {
+    window.__taiaSmartVideoInit = true
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('.taia-video-play')
+      if (!button) return
+
+      const container = button.closest('[data-video-placeholder]')
+      const embed = container?.getAttribute('data-embed')
+      if (!container || !embed) return
+
+      const iframe = document.createElement('iframe')
+      iframe.src = embed
+      iframe.title = container.getAttribute('data-title') || 'Video'
+      iframe.loading = 'lazy'
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin'
+      iframe.allowFullscreen = true
+      container.replaceWith(iframe)
+    })
+  }
+</script>
+
+<style>
+  .taia-video,
+  .taia-video-placeholder,
+  .taia-video iframe,
+  .taia-video video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border: 0;
+    border-radius: 1rem;
+    object-fit: cover;
+  }
+
+  .taia-video-placeholder {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: #0d1f31;
+  }
+
+  .taia-video-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .taia-video-play {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.6rem;
+    height: 3.6rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.94);
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+</style>

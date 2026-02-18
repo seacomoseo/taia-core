@@ -52,6 +52,18 @@ export interface TaiaConfig {
   singles: SingleConfig[]
 }
 
+export interface StylesConfig {
+  colors?: {
+    accent?: string
+    text?: string
+    background?: string
+  }
+  typography?: {
+    heading?: string
+    body?: string
+  }
+}
+
 export class ConfigService {
   private configPath: string
   private projectRoot: string
@@ -102,6 +114,18 @@ export class ConfigService {
   getDefaultLanguage(): string {
     const config = this.getTaiaConfig()
     return config.languages[0] || 'es'
+  }
+
+  getStylesConfig (): StylesConfig {
+    const stylesPath = path.join(this.projectRoot, 'content/styles.yml')
+    if (!fs.existsSync(stylesPath)) return {}
+    try {
+      const raw = fs.readFileSync(stylesPath, 'utf8')
+      const data = (yaml.load(raw) as StylesConfig) || {}
+      return data
+    } catch {
+      return {}
+    }
   }
 
   getCmsLocale(): string {
@@ -569,6 +593,82 @@ export class ConfigService {
           i18n: true,
           editor: { preview: false },
           fields: globalsFields
+        },
+        {
+          name: 'styles',
+          label: 'styles',
+          icon: 'palette',
+          file: 'content/styles.yml',
+          i18n: false,
+          editor: { preview: false },
+          fields: [
+            {
+              name: 'colors',
+              label: 'colors',
+              widget: 'object',
+              fields: [
+                { name: 'accent', label: 'accent', widget: 'string', required: false },
+                { name: 'text', label: 'text', widget: 'string', required: false },
+                { name: 'background', label: 'background', widget: 'string', required: false }
+              ]
+            },
+            {
+              name: 'typography',
+              label: 'typography',
+              widget: 'object',
+              fields: [
+                { name: 'heading', label: 'heading', widget: 'string', required: false },
+                { name: 'body', label: 'body', widget: 'string', required: false }
+              ]
+            }
+          ]
+        },
+        {
+          name: 'redirects',
+          label: 'redirects',
+          icon: 'alt_route',
+          file: 'content/redirects.yml',
+          i18n: false,
+          editor: { preview: false },
+          fields: [
+            {
+              name: 'redirects',
+              label: 'redirects',
+              label_singular: 'redirect',
+              widget: 'list',
+              collapsed: true,
+              minimize_collapsed: true,
+              fields: [
+                { name: 'from', label: 'from', widget: 'string' },
+                { name: 'to', label: 'to', widget: 'string' },
+                { name: 'type', label: 'type', widget: 'number', default: 301, required: false }
+              ]
+            }
+          ]
+        },
+        {
+          name: 'robots',
+          label: 'robots',
+          icon: 'robot_2',
+          file: 'content/robots.txt',
+          i18n: false,
+          format: 'raw',
+          editor: { preview: false },
+          fields: [
+            { name: 'body', label: 'code', widget: 'code', output_code_only: true }
+          ]
+        },
+        {
+          name: 'llms',
+          label: 'llms',
+          icon: 'smart_toy',
+          file: 'content/llms.txt',
+          i18n: false,
+          format: 'raw',
+          editor: { preview: false },
+          fields: [
+            { name: 'body', label: 'code', widget: 'code', output_code_only: true }
+          ]
         }
       ]
     })

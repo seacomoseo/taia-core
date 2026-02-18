@@ -123,6 +123,11 @@ export default function taiaCore (_options: TaiaCoreOptions = {}): AstroIntegrat
         injectRoute({ pattern: '/site.webmanifest', entrypoint: './core/src/integration/endpoints/webmanifest.ts' })
         injectRoute({ pattern: '/admin/chat', entrypoint: './core/src/integration/endpoints/chat.astro' })
         injectRoute({ pattern: '/admin', entrypoint: './core/src/integration/endpoints/cms-admin.astro' })
+        injectRoute({ pattern: '/robots.txt', entrypoint: './core/src/integration/endpoints/robots-txt.ts' })
+        injectRoute({ pattern: '/llms.txt', entrypoint: './core/src/integration/endpoints/llms-txt.ts' })
+        injectRoute({ pattern: '/_redirects', entrypoint: './core/src/integration/endpoints/redirects.ts' })
+        injectRoute({ pattern: '/sitemap.xml', entrypoint: './core/src/integration/endpoints/sitemap-xml.ts' })
+        injectRoute({ pattern: '/sitemap', entrypoint: './core/src/integration/endpoints/sitemap-page.ts' })
 
         // Assets
         injectRoute({ pattern: '/uploads/[...path]', entrypoint: './core/src/integration/endpoints/uploads.ts' })
@@ -130,6 +135,7 @@ export default function taiaCore (_options: TaiaCoreOptions = {}): AstroIntegrat
         // APIs
         // Chat siempre presente
         injectRoute({ pattern: '/api/chat', entrypoint: './core/src/integration/endpoints/api/chat.ts' })
+        injectRoute({ pattern: '/api/form-submit', entrypoint: './core/src/integration/endpoints/api/form-submit.ts' })
         
         // Checkout condicional
         if (configService.hasProductCollection()) {

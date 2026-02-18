@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content'
+import { ConfigService } from '../services/config-service'
+import { localizePath } from '../utils/i18n'
+
+interface Props {
+  collection: string
+  lang?: string
+  limit?: number
+  orderBy?: 'title' | 'date'
+  order?: 'asc' | 'desc'
+  class?: string
+}
+
+const {
+  collection,
+  lang,
+  limit,
+  orderBy = 'date',
+  order = 'desc',
+  class: className
+} = Astro.props as Props
+
+const configService = new ConfigService(process.cwd())
+const defaultLang = configService.getDefaultLanguage()
+const resolvedLang = lang || defaultLang
+const collectionConfig = configService.getTaiaConfig().collections.find((item) => item.id === collection)
+const prefix = collectionConfig ? configService.getCollectionPrefix(collectionConfig, resolvedLang) : collection
+const splitSlug = (value: string): { base: string; lang?: string } => {
+  const match = value.match(/^(.*)\.([a-zA-Z-]+)$/)
+  if (!match?.[1]) return { base: value }
+  return match[2] ? { base: match[1], lang: match[2] } : { base: match[1] }
+}
+
+const allItems = await getCollection(collection as any)
+const filtered = allItems
+  .filter((item: any) => {
+    const id = item?.id || ''
+    const { base, lang: itemLang } = splitSlug(id)
+    const currentLang = itemLang || defaultLang
+    return base !== '_index' && currentLang === resolvedLang
+  })
+  .sort((a: any, b: any) => {
+    const aValue = orderBy === 'date' ? new Date(a.data?.publishedAt || 0).getTime() : String(a.data?.title || '')
+    const bValue = orderBy === 'date' ? new Date(b.data?.publishedAt || 0).getTime() : String(b.data?.title || '')
+    if (aValue === bValue) return 0
+    const result = aValue > bValue ? 1 : -1
+    return order === 'asc' ? result : -result
+  })
+
+const items = typeof limit === 'number' ? filtered.slice(0, limit) : filtered
+
+const getItemHref = (item: any): string => {
+  const rawSlug = typeof item?.data?.slug === 'string' && item.data.slug.trim()
+    ? item.data.slug.trim()
+    : String(item.id || '')
+  const slug = rawSlug.replace(/\.[a-zA-Z-]+$/, '')
+  const route = `/${[prefix, slug].filter(Boolean).join('/')}`
+  return localizePath(route, resolvedLang, defaultLang)
+}
+---
+
+<ul class={['grid gap-4', className].filter(Boolean).join(' ')}>
+  {items.map((item: any) => (
+    <li class='rounded-xl border border-[var(--color-border)] bg-white/80 p-4'>
+      <a href={getItemHref(item)} class='font-semibold transition-colors hover:text-[var(--color-accent)]'>
+        {item.data?.title || item.id}
+      </a>
+      {(item.data?.description || item.data?.excerpt) && (
+        <p class='mt-2 text-sm text-[var(--color-text-muted)]'>{item.data?.description || item.data?.excerpt}</p>
+      )}
+    </li>
+  ))}
+</ul>

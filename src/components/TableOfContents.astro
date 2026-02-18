@@ -1,0 +1,40 @@
+---
+interface TocItem {
+  depth: number
+  slug: string
+  text: string
+}
+
+interface Props {
+  headings?: TocItem[]
+  minDepth?: number
+  maxDepth?: number
+  title?: string
+  class?: string
+}
+
+const {
+  headings = [],
+  minDepth = 2,
+  maxDepth = 3,
+  title = 'Indice',
+  class: className
+} = Astro.props as Props
+
+const items = headings.filter((item) => item.depth >= minDepth && item.depth <= maxDepth)
+---
+
+{items.length > 0 && (
+  <aside class={['taia-surface p-5', className].filter(Boolean).join(' ')} aria-label='Table of contents'>
+    <p class='mb-3 text-sm font-bold uppercase tracking-[0.08em] text-[var(--color-text-muted)]'>{title}</p>
+    <ul class='space-y-2'>
+      {items.map((item) => (
+        <li class={item.depth > minDepth ? 'ml-4' : ''}>
+          <a href={`#${item.slug}`} class='text-sm leading-relaxed text-[var(--color-text)] transition-colors hover:text-[var(--color-accent)]'>
+            {item.text}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </aside>
+)}

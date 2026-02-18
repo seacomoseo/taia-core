@@ -1,0 +1,87 @@
+---
+interface Props {
+  id?: string
+  class?: string
+}
+
+const {
+  id = `taia-carousel-${Math.random().toString(36).slice(2, 9)}`,
+  class: className
+} = Astro.props as Props
+---
+
+<section id={id} class={['taia-carousel', className].filter(Boolean).join(' ')} data-taia-carousel>
+  <div class='taia-carousel-track' data-carousel-track>
+    <slot />
+  </div>
+
+  <div class='taia-carousel-controls'>
+    <button type='button' class='taia-carousel-button' data-carousel-prev aria-label='Previous slide'>
+      ←
+    </button>
+    <button type='button' class='taia-carousel-button' data-carousel-next aria-label='Next slide'>
+      →
+    </button>
+  </div>
+</section>
+
+<script is:inline>
+  if (typeof window !== 'undefined' && !window.__taiaCarouselInit) {
+    window.__taiaCarouselInit = true
+    document.querySelectorAll('[data-taia-carousel]').forEach((carousel) => {
+      const track = carousel.querySelector('[data-carousel-track]')
+      const prev = carousel.querySelector('[data-carousel-prev]')
+      const next = carousel.querySelector('[data-carousel-next]')
+      if (!track || !prev || !next) return
+
+      const step = () => Math.max(260, Math.round(carousel.clientWidth * 0.8))
+
+      prev.addEventListener('click', () => {
+        track.scrollBy({ left: -step(), behavior: 'smooth' })
+      })
+
+      next.addEventListener('click', () => {
+        track.scrollBy({ left: step(), behavior: 'smooth' })
+      })
+    })
+  }
+</script>
+
+<style>
+  .taia-carousel {
+    position: relative;
+  }
+
+  .taia-carousel-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(260px, 1fr);
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 0.35rem;
+  }
+
+  .taia-carousel-track :global(*) {
+    scroll-snap-align: start;
+  }
+
+  .taia-carousel-controls {
+    margin-top: 0.8rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .taia-carousel-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border, #d4cfbf);
+    background: rgba(255, 255, 255, 0.92);
+    cursor: pointer;
+  }
+</style>

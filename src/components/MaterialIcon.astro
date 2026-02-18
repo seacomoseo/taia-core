@@ -1,0 +1,49 @@
+---
+interface Props {
+  name: string
+  size?: number | string
+  class?: string
+  filled?: boolean
+  grade?: number
+  weight?: number
+  opticalSize?: number
+  label?: string
+}
+
+const {
+  name,
+  size = 24,
+  class: className,
+  filled = false,
+  grade = 0,
+  weight = 400,
+  opticalSize = 24,
+  label
+} = Astro.props as Props
+---
+
+<span
+  class={['taia-material-symbols align-middle leading-none', className].filter(Boolean).join(' ')}
+  style={`font-size:${typeof size === 'number' ? `${size}px` : size};font-variation-settings:'FILL' ${filled ? 1 : 0},'GRAD' ${grade},'opsz' ${opticalSize},'wght' ${weight};`}
+  aria-hidden={label ? 'false' : 'true'}
+  aria-label={label}
+>{name}</span>
+
+<style is:global>
+  @font-face {
+    font-family: 'TAIA Material Symbols';
+    src: url('/assets/fonts/material-symbols-subset.woff2') format('woff2');
+    font-weight: 100 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  .taia-material-symbols {
+    font-family: 'TAIA Material Symbols', 'Material Symbols Rounded', sans-serif;
+    font-style: normal;
+    display: inline-block;
+    letter-spacing: normal;
+    white-space: nowrap;
+    direction: ltr;
+  }
+</style>

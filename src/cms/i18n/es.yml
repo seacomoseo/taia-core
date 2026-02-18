@@ -89,6 +89,16 @@ labels:
   collectionId: Colección
   collection: Colección
   code: Código
+  colors: Colores
+  typography: Tipografía
+  accent: Acento
+  background: Fondo
+  heading: Titular
+  redirects: Redirecciones
+  redirect: Redirección
+  from: Desde
+  to: Hacia
+  type: Tipo
 hints:
   slug: 'Estilo URL amigable, ej: "entrada-blog"'
   description: Usado para meta description
@@ -114,3 +124,7 @@ collections:
 files:
   settings.general: General
   settings.globals: Textos Globales
+  settings.styles: Estilos
+  settings.redirects: Redirecciones
+  settings.robots: robots.txt
+  settings.llms: llms.txt

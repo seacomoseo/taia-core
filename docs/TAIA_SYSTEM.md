@@ -97,6 +97,29 @@ Optimized images with srcset, lazy loading, explicit dimensions for CLS.
 ### SmartLink
 Auto-detects internal/external links, accessibility announcements.
 
+### FaqAccordion and ReviewsList
+Reusable trust components with optional Schema.org JSON-LD output.
+
+### SmartVideo, LightboxGallery, Carousel
+Progressive media primitives for video embeds and interactive galleries.
+
+### AjaxForm and LeafletField
+Progressive AJAX form flow with anti-spam guards, conditional fields, file previews, and map-based spatial input.
+
+## Generated Technical Outputs
+
+- `/sitemap.xml` generated from content and config.
+- `/sitemap` human-readable site map page.
+- `/robots.txt` served from `content/robots.txt` (with defaults if missing).
+- `/llms.txt` served from `content/llms.txt` or generated fallback.
+- `/_redirects` served from `content/redirects.yml` for Cloudflare Pages-compatible redirects.
+
+## Contact Tracking
+
+- Unified custom event: `contact` with payload `{ id, type, label }`.
+- Development mode logs contact events to console.
+- Production mode sends events to GA4 via `gtag` when configured.
+
 ### SectionShell
 Consistent spacing and responsive containers.
 

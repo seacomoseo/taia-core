@@ -1,0 +1,185 @@
+---
+interface Props {
+  action?: string
+  method?: 'POST'
+  id?: string
+  class?: string
+  successMessage?: string
+  errorMessage?: string
+  redirectTo?: string
+  showFilePreview?: boolean
+}
+
+const {
+  action = '/api/form-submit',
+  method = 'POST',
+  id = `form-${Math.random().toString(36).slice(2, 9)}`,
+  class: className,
+  successMessage = 'Mensaje enviado correctamente.',
+  errorMessage = 'No se pudo enviar el formulario.',
+  redirectTo,
+  showFilePreview = true
+} = Astro.props as Props
+
+const csrfToken = Math.random().toString(36).slice(2) + Date.now().toString(36)
+const startedAt = Date.now()
+---
+
+<form
+  id={id}
+  action={action}
+  method={method}
+  class={className}
+  data-ajax-form
+  data-success={successMessage}
+  data-error={errorMessage}
+  data-redirect={redirectTo}
+  data-show-file-preview={showFilePreview ? 'true' : 'false'}
+>
+  <input type='hidden' name='_csrf' value={csrfToken} />
+  <input type='hidden' name='_startedAt' value={String(startedAt)} />
+  <input type='text' name='_website' tabindex='-1' autocomplete='off' class='hidden' aria-hidden='true' />
+
+  <slot />
+
+  <p class='hidden mt-3 text-sm' data-form-status role='status' aria-live='polite'></p>
+</form>
+
+<script is:inline>
+  if (typeof window !== 'undefined' && !window.__taiaAjaxFormInit) {
+    window.__taiaAjaxFormInit = true
+
+    const matchRule = (form, field, rawRule) => {
+      if (!rawRule) return false
+      const [name, expected] = rawRule.split(':')
+      const target = form.elements.namedItem(name)
+      if (!target) return false
+
+      if (target instanceof RadioNodeList) {
+        return target.value === expected
+      }
+
+      const input = target
+      const value = input.type === 'checkbox' ? String(input.checked) : String(input.value)
+      return value === expected
+    }
+
+    const syncConditionalFields = (form) => {
+      form.querySelectorAll('[data-show-when]').forEach((node) => {
+        const shouldShow = matchRule(form, node, node.getAttribute('data-show-when'))
+        node.hidden = !shouldShow
+      })
+
+      form.querySelectorAll('[data-required-when]').forEach((input) => {
+        const required = matchRule(form, input, input.getAttribute('data-required-when'))
+        input.required = required
+      })
+    }
+
+    const renderFilePreview = (input) => {
+      const form = input.closest('form')
+      if (!form || form.dataset.showFilePreview !== 'true') return
+      const output = form.querySelector(`[data-file-preview="${input.name}"]`)
+      if (!output) return
+
+      output.innerHTML = ''
+      Array.from(input.files || []).forEach((file) => {
+        const row = document.createElement('div')
+        row.className = 'taia-file-preview-row'
+        row.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`
+        output.appendChild(row)
+
+        if (file.type.startsWith('image/')) {
+          const img = document.createElement('img')
+          img.className = 'taia-file-preview-image'
+          img.alt = file.name
+          img.src = URL.createObjectURL(file)
+          output.appendChild(img)
+        }
+      })
+    }
+
+    document.addEventListener('change', (event) => {
+      const target = event.target
+      const form = target?.closest?.('[data-ajax-form]')
+      if (!form) return
+
+      syncConditionalFields(form)
+      if (target?.type === 'file') renderFilePreview(target)
+    })
+
+    document.addEventListener('submit', async (event) => {
+      const form = event.target
+      if (!form.matches?.('[data-ajax-form]')) return
+      event.preventDefault()
+
+      syncConditionalFields(form)
+
+      const submitButton = form.querySelector('[type="submit"]')
+      const status = form.querySelector('[data-form-status]')
+      if (submitButton) submitButton.disabled = true
+
+      const formData = new FormData(form)
+
+      try {
+        const response = await fetch(form.action, {
+          method: form.method || 'POST',
+          body: formData
+        })
+
+        const payload = await response.json().catch(() => ({}))
+        if (!response.ok || payload.ok !== true) {
+          throw new Error(payload.error || 'FORM_SUBMIT_FAILED')
+        }
+
+        if (status) {
+          status.classList.remove('hidden')
+          status.classList.remove('text-red-700')
+          status.classList.add('text-green-700')
+          status.textContent = form.dataset.success || 'Mensaje enviado correctamente.'
+        }
+
+        const sectionId = (form.closest('[id]') && form.closest('[id]').id) || form.id || 'form'
+        document.dispatchEvent(new CustomEvent('taia:contact', {
+          detail: {
+            id: sectionId,
+            type: 'form',
+            label: form.id || 'ajax-form'
+          }
+        }))
+
+        if (form.dataset.redirect) {
+          window.location.href = form.dataset.redirect
+          return
+        }
+
+        form.reset()
+        syncConditionalFields(form)
+      } catch {
+        if (status) {
+          status.classList.remove('hidden')
+          status.classList.remove('text-green-700')
+          status.classList.add('text-red-700')
+          status.textContent = form.dataset.error || 'No se pudo enviar el formulario.'
+        }
+      } finally {
+        if (submitButton) submitButton.disabled = false
+      }
+    })
+  }
+</script>
+
+<style is:global>
+  .taia-file-preview-row {
+    margin-top: 0.35rem;
+    font-size: 0.88rem;
+    color: var(--color-text-muted, #5d6982);
+  }
+
+  .taia-file-preview-image {
+    margin-top: 0.45rem;
+    max-width: min(11rem, 100%);
+    border-radius: 0.6rem;
+    border: 1px solid var(--color-border, #d4cfbf);
+  }
+</style>

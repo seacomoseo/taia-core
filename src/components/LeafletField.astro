@@ -1,0 +1,150 @@
+---
+interface Props {
+  name?: string
+  mode?: 'point' | 'radius' | 'polygon'
+  lat?: number
+  lng?: number
+  zoom?: number
+  radius?: number
+  class?: string
+  height?: string
+}
+
+const {
+  name = 'location',
+  mode = 'point',
+  lat = 40.4168,
+  lng = -3.7038,
+  zoom = 12,
+  radius = 800,
+  class: className,
+  height = '20rem'
+} = Astro.props as Props
+
+const elementId = `taia-leaflet-${Math.random().toString(36).slice(2, 9)}`
+---
+
+<div class={className}>
+  <div id={elementId} data-leaflet-field data-name={name} data-mode={mode} data-lat={String(lat)} data-lng={String(lng)} data-zoom={String(zoom)} data-radius={String(radius)} style={`height:${height};`} class='rounded-xl border border-[var(--color-border)]'></div>
+  <input type='hidden' name={name} data-leaflet-output />
+</div>
+
+<script is:inline>
+  const loadLeaflet = async () => {
+    if (window.L) return window.L
+
+    const cssId = 'taia-leaflet-css'
+    if (!document.getElementById(cssId)) {
+      const link = document.createElement('link')
+      link.id = cssId
+      link.rel = 'stylesheet'
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+      link.crossOrigin = ''
+      document.head.appendChild(link)
+    }
+
+    await new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-leaflet-script]')
+      if (existing) {
+        existing.addEventListener('load', resolve, { once: true })
+        existing.addEventListener('error', reject, { once: true })
+        if (window.L) resolve(null)
+        return
+      }
+
+      const script = document.createElement('script')
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+      script.async = true
+      script.dataset.leafletScript = 'true'
+      script.onload = () => resolve(null)
+      script.onerror = reject
+      document.body.appendChild(script)
+    })
+
+    return window.L
+  }
+
+  if (typeof window !== 'undefined' && !window.__taiaLeafletFieldInit) {
+    window.__taiaLeafletFieldInit = true
+
+    loadLeaflet().then((L) => {
+      if (!L) return
+      document.querySelectorAll('[data-leaflet-field]').forEach((element) => {
+        if (element.dataset.leafletReady === 'true') return
+        element.dataset.leafletReady = 'true'
+
+        const mode = element.dataset.mode || 'point'
+        const name = element.dataset.name || 'location'
+        const lat = Number(element.dataset.lat || '0')
+        const lng = Number(element.dataset.lng || '0')
+        const zoom = Number(element.dataset.zoom || '12')
+        const radius = Number(element.dataset.radius || '500')
+        const map = L.map(element).setView([lat, lng], zoom)
+        const output = element.parentElement?.querySelector(`[data-leaflet-output][name="${name}"]`)
+
+        const streets = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        })
+        const sat = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+          maxZoom: 19,
+          attribution: '&copy; Stadia Maps &copy; OpenMapTiles &copy; OpenStreetMap contributors'
+        })
+        streets.addTo(map)
+        L.control.layers({ Normal: streets, Satellite: sat }).addTo(map)
+
+        let marker = null
+        let circle = null
+        let polygon = null
+        const polygonPoints = []
+
+        const setOutput = (value) => {
+          if (output) output.value = JSON.stringify(value)
+        }
+
+        if (mode === 'point' || mode === 'radius') {
+          marker = L.marker([lat, lng]).addTo(map)
+          if (mode === 'radius') {
+            circle = L.circle([lat, lng], { radius }).addTo(map)
+            setOutput({ type: 'radius', center: { lat, lng }, radius })
+          } else {
+            setOutput({ type: 'point', lat, lng })
+          }
+        }
+
+        map.on('click', (event) => {
+          const { lat: clickLat, lng: clickLng } = event.latlng
+          if (mode === 'polygon') {
+            polygonPoints.push([clickLat, clickLng])
+            if (polygon) map.removeLayer(polygon)
+            polygon = L.polygon(polygonPoints).addTo(map)
+            setOutput({ type: 'polygon', points: polygonPoints.map(([a, b]) => ({ lat: a, lng: b })) })
+            return
+          }
+
+          if (!marker) {
+            marker = L.marker([clickLat, clickLng]).addTo(map)
+          } else {
+            marker.setLatLng([clickLat, clickLng])
+          }
+
+          if (mode === 'radius') {
+            if (!circle) {
+              circle = L.circle([clickLat, clickLng], { radius }).addTo(map)
+            } else {
+              circle.setLatLng([clickLat, clickLng])
+            }
+            setOutput({ type: 'radius', center: { lat: clickLat, lng: clickLng }, radius: circle.getRadius() })
+            return
+          }
+
+          setOutput({ type: 'point', lat: clickLat, lng: clickLng })
+        })
+
+        if (mode === 'polygon') {
+          setOutput({ type: 'polygon', points: [] })
+        }
+      })
+    }).catch(() => {})
+  }
+</script>

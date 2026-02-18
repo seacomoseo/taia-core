@@ -1,0 +1,118 @@
+---
+interface GalleryItem {
+  src: string
+  alt: string
+  thumb?: string
+}
+
+interface Props {
+  items: GalleryItem[]
+  columns?: 2 | 3 | 4
+  class?: string
+}
+
+const {
+  items = [],
+  columns = 3,
+  class: className
+} = Astro.props as Props
+
+const columnsClass = {
+  2: 'grid-cols-2',
+  3: 'grid-cols-2 md:grid-cols-3',
+  4: 'grid-cols-2 md:grid-cols-4'
+}[columns]
+---
+
+<section class={className}>
+  <div class={['grid gap-3', columnsClass].join(' ')}>
+    {items.map((item, index) => (
+      <button
+        type='button'
+        class='group relative overflow-hidden rounded-xl'
+        data-lightbox-open
+        data-index={String(index)}
+        data-src={item.src}
+        data-alt={item.alt}
+      >
+        <img src={item.thumb || item.src} alt={item.alt} loading='lazy' decoding='async' class='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105' />
+      </button>
+    ))}
+  </div>
+</section>
+
+<script is:inline>
+  if (typeof window !== 'undefined' && !window.__taiaLightboxInit) {
+    window.__taiaLightboxInit = true
+
+    const buildOverlay = () => {
+      const overlay = document.createElement('dialog')
+      overlay.id = 'taia-lightbox'
+      overlay.className = 'taia-lightbox'
+      overlay.innerHTML = `
+        <button class="taia-lightbox-close" type="button" aria-label="Close">×</button>
+        <img class="taia-lightbox-image" alt="" />
+        <p class="taia-lightbox-caption"></p>
+      `
+      document.body.appendChild(overlay)
+      return overlay
+    }
+
+    const overlay = document.getElementById('taia-lightbox') || buildOverlay()
+    const image = overlay.querySelector('.taia-lightbox-image')
+    const caption = overlay.querySelector('.taia-lightbox-caption')
+    const closeButton = overlay.querySelector('.taia-lightbox-close')
+
+    closeButton?.addEventListener('click', () => overlay.close())
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) overlay.close()
+    })
+
+    document.addEventListener('click', (event) => {
+      const trigger = event.target.closest('[data-lightbox-open]')
+      if (!trigger) return
+      const src = trigger.getAttribute('data-src')
+      const alt = trigger.getAttribute('data-alt') || ''
+      if (!src || !image || !caption) return
+      image.src = src
+      image.alt = alt
+      caption.textContent = alt
+      overlay.showModal()
+    })
+  }
+</script>
+
+<style is:global>
+  .taia-lightbox {
+    width: min(90vw, 72rem);
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .taia-lightbox::backdrop {
+    background: rgba(4, 8, 14, 0.8);
+  }
+
+  .taia-lightbox-image {
+    width: 100%;
+    border-radius: 0.9rem;
+  }
+
+  .taia-lightbox-caption {
+    margin: 0.6rem 0 0;
+    text-align: center;
+    color: #f5f7ff;
+  }
+
+  .taia-lightbox-close {
+    position: absolute;
+    top: -2.2rem;
+    right: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 1.8rem;
+    cursor: pointer;
+  }
+</style>

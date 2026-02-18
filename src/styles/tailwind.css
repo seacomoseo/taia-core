@@ -37,7 +37,7 @@ body {
   background: radial-gradient(circle at 10% 10%, rgba(211, 173, 120, 0.18), transparent 36%),
     radial-gradient(circle at 90% 0%, rgba(29, 86, 176, 0.14), transparent 38%),
     linear-gradient(180deg, #fcfbf7 0%, #efede6 100%);
-  font-family: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: var(--taia-font-body, 'Manrope'), 'Avenir Next', 'Segoe UI', sans-serif;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
@@ -72,7 +72,7 @@ a {
 }
 
 .taia-section-title {
-  font-family: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', serif;
+  font-family: var(--taia-font-heading, 'Fraunces'), 'Iowan Old Style', 'Palatino Linotype', serif;
   letter-spacing: -0.025em;
   line-height: 1.1;
 }
@@ -102,7 +102,7 @@ a {
 .taia-content h2,
 .taia-content h3,
 .taia-content h4 {
-  font-family: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', serif;
+  font-family: var(--taia-font-heading, 'Fraunces'), 'Iowan Old Style', 'Palatino Linotype', serif;
   line-height: 1.2;
   letter-spacing: -0.02em;
 }

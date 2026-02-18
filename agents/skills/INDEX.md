@@ -34,6 +34,7 @@
 - `skill_astro_sveltia_tailwind`
 - `skill_cms_schema_generator`
 - `skill_i18n_content`
+- `skill_legal_compliance_web`
 - `skill_ecommerce_mvp`
 - `skill_ux_review`
 - `skill_performance_audit`
