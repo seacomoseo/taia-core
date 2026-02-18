@@ -6,7 +6,7 @@ This file is the canonical source of truth for agent behavior across this projec
 
 - Main editable website surface for delivery tasks:
   - `../content/`
-  - `../templates/`
+  - `../layouts/`
   - `../components/`
   - `../uploads/`
 - Core logic, reusable contracts, and system behavior live in `core/`.
@@ -16,7 +16,7 @@ This file is the canonical source of truth for agent behavior across this projec
 - Framework: Astro.
 - CMS: Sveltia CMS.
 - Styling: Tailwind CSS (via `@tailwindcss/vite`).
-- Prefer Tailwind utility classes in templates/components; use custom CSS only when utilities are insufficient.
+- Prefer Tailwind utility classes in layouts/components; use custom CSS only when utilities are insufficient.
 
 ## Instruction Precedence
 
@@ -36,8 +36,8 @@ If instructions conflict, follow the higher level and document tradeoffs.
 
 ## Content and CMS Contract
 
-- Site settings source: `../content/settings.yml`.
-- Collections and singles are declared in `../content/settings.yml`.
+- Site settings source: `../content/config.yml`.
+- Collections and singles are declared in `../content/config.yml`.
 - Collection routes use `../content/<collection>/_index.<lang>.md` with `path` and `slug`.
 - Home page source: `../content/singles/_home.<lang>.md`.
 - CMS config endpoint: `/admin/config.yml`.
@@ -48,7 +48,7 @@ If instructions conflict, follow the higher level and document tradeoffs.
 ## i18n Contract
 
 - Runtime translatable strings: `../content/globals/<lang>.yml`.
-- CMS locale switch: `cmsLocale` in `../content/settings.yml` (`es` or `en`).
+- CMS locale switch: `cmsLocale` in `../content/config.yml` (`es` or `en`).
 - `cmsGlobals` and `cmsFields` labels/hints must be inline objects: `{ es, en }`.
 - Core built-in CMS labels/hints live in `core/src/cms/i18n/<lang>.yml` and use field-name keys.
 - Field default behavior: `required: false` unless explicitly `true`.

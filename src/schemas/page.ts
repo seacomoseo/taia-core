@@ -17,7 +17,7 @@ export const pageSchema = z.object({
   seo: seoSchema,
 
   // Layout
-  template: z.enum(['default', 'landing', 'minimal']).optional().default('default'),
+  layout: z.enum(['default', 'landing', 'minimal']).optional().default('default'),
 
   // Status
   draft: z.boolean().optional().default(false),

@@ -171,7 +171,7 @@ describe('Category Schema', () => {
 
 describe('Schema Registry', () => {
   const getSettingsSchemaTypes = () => {
-    const settingsPath = path.join(process.cwd(), 'content/settings.yml')
+    const settingsPath = path.join(process.cwd(), 'content/config.yml')
     if (!fs.existsSync(settingsPath)) return []
     const raw = fs.readFileSync(settingsPath, 'utf8')
     const config = (yaml.load(raw) as Record<string, any>) || {}
@@ -182,7 +182,7 @@ describe('Schema Registry', () => {
       .filter((value): value is string => typeof value === 'string')
   }
 
-  it('maps schema types used in settings.yml', () => {
+  it('maps schema types used in config.yml', () => {
     const schemaTypes = getSettingsSchemaTypes()
     if (!schemaTypes.length) return
 

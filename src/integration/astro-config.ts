@@ -17,7 +17,7 @@ export interface TaiaAstroConfigOptions {
 }
 
 function loadSettings (projectRoot: string): { siteUrl?: string } {
-  const settingsPath = path.join(projectRoot, 'content/settings.yml')
+  const settingsPath = path.join(projectRoot, 'content/config.yml')
   if (!fs.existsSync(settingsPath)) return {}
 
   try {
@@ -28,7 +28,7 @@ function loadSettings (projectRoot: string): { siteUrl?: string } {
       return siteUrl ? { siteUrl } : {}
     }
   } catch (error) {
-    console.warn('Failed to load content/settings.yml for site config', error)
+    console.warn('Failed to load content/config.yml for site config', error)
   }
 
   return {}

@@ -29,12 +29,12 @@ Standard collections:
 - `products` - E-commerce items
 - `categories` - Taxonomy
 - `singles` - Individual pages (home, legal, etc.)
-- `templates` - Astro templates (code widget)
+- `layouts` - Astro layouts (code widget)
 - `components` - Astro components (code widget)
 - `i18n` - Translatable strings per language
 - `settings` - Site config
 
-Templates and components must use `widget: code` with `output_code_only: true` (no `default_language`).
+Layouts and components must use `widget: code` with `output_code_only: true` (no `default_language`).
 Use `i18n: true` on translatable fields when CMS is configured with multiple locales.
 Use `i18n: 'duplicate'` for technical fields (ids, prices, booleans, relations).
 Collections and singles should expose `singular` and `icon` metadata in settings.

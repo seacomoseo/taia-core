@@ -9,18 +9,18 @@ Use this skill to keep implementation consistent with the project's core stack c
 
 ## When to Use
 
-- Creating new pages, templates, or components.
+- Creating new pages, layouts, or components.
 - Refactoring website UI.
 - Setting up a fresh client copy of TAIA.
 
 ## Inputs
 
 1. `core/AGENTS.md`.
-2. Current templates/components/content structure.
+2. Current layouts/components/content structure.
 
 ## Process
 
-1. Keep CMS/content edits in `content/`, `templates/`, `components/`, and `uploads/`.
+1. Keep CMS/content edits in `content/`, `layouts/`, `components/`, and `uploads/`.
 2. Keep CMS schema behavior aligned with Sveltia conventions already defined in core.
 3. Build UI with Tailwind utility classes first.
 4. Only introduce custom CSS when utility classes cannot express a needed behavior.

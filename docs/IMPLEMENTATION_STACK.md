@@ -26,10 +26,10 @@ pnpm add -D tailwindcss @tailwindcss/vite
 
 ## Implementation Rules
 
-- Prefer Tailwind utility classes for templates/components.
+- Prefer Tailwind utility classes for layouts/components.
 - Keep custom CSS for cases where utilities are insufficient.
 - Keep CMS-editable website work inside:
   - `content/`
-  - `templates/`
+  - `layouts/`
   - `components/`
   - `uploads/`

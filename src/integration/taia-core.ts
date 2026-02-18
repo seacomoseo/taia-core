@@ -1,6 +1,8 @@
 import type { AstroIntegration } from 'astro'
 import { ConfigService } from '../services/config-service'
 import { generateFaviconAssets } from './utils/favicon-generator'
+import fs from 'node:fs'
+import path from 'node:path'
 
 const VIRTUAL_CONTENT_CONFIG_ID = 'virtual:taia-content-config'
 const RESOLVED_VIRTUAL_CONTENT_CONFIG_ID = `\0${VIRTUAL_CONTENT_CONFIG_ID}`
@@ -38,7 +40,7 @@ function generateContentConfigModule (projectRoot: string): string {
     '  title: z.string().optional(),',
     '  description: z.string().optional(),',
     '  slug: z.string().optional(),',
-    '  template: z.string().optional(),',
+    '  layout: z.string().optional(),',
     '  seo: seoSchema.optional()',
     '}).passthrough()',
     '',
@@ -71,6 +73,28 @@ function taiaContentConfigPlugin (projectRoot: string) {
   }
 }
 
+function taiaOverridePlugin (projectRoot: string) {
+  return {
+    name: 'taia-overrides',
+    enforce: 'pre' as const,
+    resolveId (id: string) {
+      const componentMatch = id.match(/^@core\/components\/(.+\.astro)$/)
+      if (componentMatch?.[1]) {
+        const projectComponentPath = path.join(projectRoot, 'components', componentMatch[1])
+        if (fs.existsSync(projectComponentPath)) return projectComponentPath
+      }
+
+      const layoutMatch = id.match(/^@core\/layouts\/(.+\.astro)$/)
+      if (layoutMatch?.[1]) {
+        const projectLayoutPath = path.join(projectRoot, 'layouts', layoutMatch[1])
+        if (fs.existsSync(projectLayoutPath)) return projectLayoutPath
+      }
+
+      return null
+    }
+  }
+}
+
 export interface TaiaCoreOptions {
   // Opciones futuras
 }
@@ -88,7 +112,7 @@ export default function taiaCore (_options: TaiaCoreOptions = {}): AstroIntegrat
 
         updateConfig({
           vite: {
-            plugins: [taiaContentConfigPlugin(process.cwd())]
+            plugins: [taiaOverridePlugin(process.cwd()), taiaContentConfigPlugin(process.cwd())]
           }
         })
         

@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * Internal Link Checker CLI
- * Checks for broken internal links in content and templates
+ * Checks for broken internal links in content and layouts
  * Usage: pnpm taia:links [content-dir]
  */
 
@@ -64,7 +64,7 @@ function extractLinks (content: string, filePath: string): Link[] {
 }
 
 /**
- * Find all content and template files
+ * Find all content and layout files
  */
 function findFiles (dir: string, extensions: string[]): string[] {
   const files: string[] = []

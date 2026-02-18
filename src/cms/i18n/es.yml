@@ -77,14 +77,14 @@ labels:
   lang: Idioma
   cmsLocale: Idioma del CMS
   collections: Colecciones
-  singles: Páginas individuales
-  single: Página individual
+  singles: Páginas Únicas
+  single: Página Única
   id: ID
   label: Etiqueta
   singular: Singular
   icon: Icono
   schemaType: Tipo Schema
-  template: Plantilla
+  layout: Plantilla
   taxonomyOf: Taxonomía de
   collectionId: Colección
   collection: Colección
@@ -102,13 +102,15 @@ hints:
   ga4Id: G-XXXXXXXXXX
   languages: Código de idioma [ISO-639-1](https://es.wikipedia.org/wiki/ISO_639-1) + Variante Regional opcional [ISO 3166-1](https://es.wikipedia.org/wiki/ISO_3166-1)
 collections:
-  settings: Configuración
-  templates: Plantillas
-  templates.singular: Plantilla
+  settings: Configuracion
+  layouts: Plantillas
+  layouts.singular: Plantilla
   components: Componentes
   components.singular: Componente
-  singles: Páginas individuales
-  globals: Textos globales
+  singles: Páginas Únicas
+  pages: Páginas Simples
+  pages.singular: Página Simple
+  globals: Textos Globales
 files:
   settings.general: General
-  settings.globals: Textos globales
+  settings.globals: Textos Globales

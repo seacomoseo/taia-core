@@ -91,14 +91,16 @@ const getEntries = async (id: string) => {
 }
 
 let entry: any
-let template: string | undefined
+let layout: string | undefined
 let type: 'collection' | 'single' = 'collection'
+let collectionId: string | undefined
+let collectionItems: any[] = []
 
 if (segments.length === 0) {
   entry = findEntryByBase(singlesEntries, 'home', lang) || findEntryByBase(singlesEntries, '_home', lang)
   if (entry) {
     const singleConfig = taiaConfig.singles.find((item) => item.id.replace(/^_/, '') === 'home')
-    template = singleConfig?.template || 'default'
+    layout = singleConfig?.layout || 'default'
     type = 'single'
   }
 }
@@ -116,7 +118,7 @@ for (const single of taiaConfig.singles) {
   }
 
   if (entry) {
-    template = single.template
+    layout = single.layout
     type = 'single'
     break
   }
@@ -134,7 +136,7 @@ if (!entry) {
     const { base } = splitSlug(entry.id || entry.slug)
     const normalizedBase = base.replace(/^_/, '')
     const singleConfig = taiaConfig.singles.find((item) => item.id.replace(/^_/, '') === normalizedBase)
-    template = singleConfig?.template || 'default'
+    layout = singleConfig?.layout || 'default'
     type = 'single'
   }
 }
@@ -148,7 +150,12 @@ if (!entry) {
     if (matchesSegments(segments, landingSegments)) {
       entry = findEntryByBase(entries, '_index', lang)
       if (entry) {
-        template = col.template
+        layout = 'collection'
+        collectionId = col.id
+        collectionItems = entries.filter((item: any) => {
+          const { base } = splitSlug(item.id || item.slug)
+          return matchesLang(item, lang) && base !== '_index'
+        })
         type = 'collection'
         break
       }
@@ -165,7 +172,7 @@ if (!entry) {
     const slugValue = remaining.join('/')
     entry = findEntryByBase(entries, slugValue, lang)
     if (entry) {
-      template = col.template
+      layout = col.layout
       type = 'collection'
       break
     }
@@ -178,15 +185,16 @@ if (!entry) {
 
 const { Content } = await render(entry)
 
-const templates = import.meta.glob('/templates/*.astro', { eager: true }) as Record<string, { default: any }>
-const templateName = template || 'default'
-const TemplateComponent = templates[`/templates/${templateName}.astro`]?.default || templates['/templates/default.astro']?.default
+const projectLayouts = import.meta.glob('/layouts/*.astro', { eager: true }) as Record<string, { default: any }>
+const coreLayouts = import.meta.glob('/core/src/layouts/*.astro', { eager: true }) as Record<string, { default: any }>
+const layoutName = layout || 'default'
+const TemplateComponent = projectLayouts[`/layouts/${layoutName}.astro`]?.default || coreLayouts[`/core/src/layouts/${layoutName}.astro`]?.default || coreLayouts['/core/src/layouts/default.astro']?.default
 
 if (!TemplateComponent) {
-  throw new Error(`Template ${templateName} not found used in ${type}`)
+  throw new Error(`Layout ${layoutName} not found used in ${type}`)
 }
 ---
 
-<TemplateComponent entry={entry} lang={lang}>
+<TemplateComponent entry={entry} lang={lang} collectionId={collectionId} items={collectionItems}>
   <Content />
 </TemplateComponent>

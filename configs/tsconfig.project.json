@@ -16,7 +16,7 @@
     "../../.astro/types.d.ts",
     "../../components/**/*",
     "../../content/**/*",
-    "../../templates/**/*",
+    "../../layouts/**/*",
     "../../core/src/types/**/*",
     "../../functions/**/*",
     "../../*.config.*"

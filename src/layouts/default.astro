@@ -1,0 +1,33 @@
+---
+import BaseLayout from './BaseLayout.astro'
+
+interface Props {
+  entry: any
+  lang?: string
+}
+
+const { entry, lang = 'es' } = Astro.props as Props
+const title = entry?.data?.seo?.title || entry?.data?.title || 'Untitled'
+const description = entry?.data?.seo?.description || entry?.data?.description || ''
+const canonical = entry?.data?.seo?.canonical
+const noindex = entry?.data?.seo?.noindex
+const image = entry?.data?.image
+const imageAlt = entry?.data?.imageAlt
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={canonical}
+  image={image}
+  imageAlt={imageAlt}
+  locale={lang}
+  noindex={noindex}
+>
+  <main id='main-content' class='mx-auto w-full max-w-5xl px-6 py-12 md:px-12'>
+    <article class='taia-content taia-surface p-6 md:p-10'>
+      {entry?.data?.title && <h1 class='taia-section-title mb-4 text-4xl text-balance md:text-5xl'>{entry.data.title}</h1>}
+      <slot />
+    </article>
+  </main>
+</BaseLayout>

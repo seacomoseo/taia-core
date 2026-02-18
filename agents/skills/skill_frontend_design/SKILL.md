@@ -15,7 +15,7 @@ Design and implement memorable interfaces with clear aesthetic direction.
 ## Inputs
 
 1. Brand identity and copy style docs.
-2. Content requirements and template context.
+2. Content requirements and layout context.
 3. Target device constraints.
 
 ## Process
@@ -37,7 +37,7 @@ Design and implement memorable interfaces with clear aesthetic direction.
 
 1. `/_context/design/ui-direction.md`
 2. `/_context/design/component-guidelines.md`
-3. Updated implementation files in `content/`, `templates/`, `components/`, and `uploads/` as needed.
+3. Updated implementation files in `content/`, `layouts/`, `components/`, and `uploads/` as needed.
 
 ## Definition of Done
 

@@ -139,7 +139,7 @@ Use proper BCP 47 codes:
 ```yaml
 title: About Us
 slug: about
-template: default
+layout: default
 seo:
   title: About Our Company | Brand Name
   description: Learn about our mission, team, and values.

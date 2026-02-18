@@ -22,7 +22,7 @@ export interface CollectionConfig {
   singular?: string
   icon?: string
   schemaType: SchemaOrgTypeValue
-  template?: string
+  layout?: string
   folder?: string
   taxonomyOf?: string[]
 }
@@ -32,7 +32,7 @@ export interface SingleConfig {
   label: string
   icon?: string
   schemaType: SchemaOrgTypeValue
-  template?: string
+  layout?: string
   file?: string
 }
 
@@ -58,7 +58,7 @@ export class ConfigService {
 
   constructor (projectRoot: string) {
     this.projectRoot = projectRoot
-    this.configPath = path.join(projectRoot, 'content/settings.yml')
+    this.configPath = path.join(projectRoot, 'content/config.yml')
   }
 
   getTaiaConfig (): TaiaConfig {
@@ -204,8 +204,8 @@ export class ConfigService {
     return `${single.id}.${resolvedLang}`
   }
 
-  getTemplates (): string[] {
-    const dir = path.join(this.projectRoot, 'templates')
+  getLayouts (): string[] {
+    const dir = path.join(this.projectRoot, 'layouts')
     return this.listAstroFiles(dir)
   }
 
@@ -214,9 +214,9 @@ export class ConfigService {
     return this.listAstroFiles(dir)
   }
 
-  private getTemplateFields (templateName?: string): CMSField[] {
-    if (!templateName) return []
-    const filePath = path.join(this.projectRoot, 'templates', `${templateName}.astro`)
+  private getLayoutFields (layoutName?: string): CMSField[] {
+    if (!layoutName) return []
+    const filePath = path.join(this.projectRoot, 'layouts', `${layoutName}.astro`)
     if (!fs.existsSync(filePath)) return []
     const source = fs.readFileSync(filePath, 'utf8')
     const fields = this.extractExportedValue(source, 'cmsFields')
@@ -244,10 +244,10 @@ export class ConfigService {
       hash.update(fs.readFileSync(this.configPath, 'utf8'))
     }
 
-    const templateFiles = this.getTemplates().map((name) => path.join(this.projectRoot, 'templates', `${name}.astro`))
+    const layoutFiles = this.getLayouts().map((name) => path.join(this.projectRoot, 'layouts', `${name}.astro`))
     const componentFiles = this.getComponents().map((name) => path.join(this.projectRoot, 'components', `${name}.astro`))
 
-    for (const filePath of [...templateFiles, ...componentFiles]) {
+    for (const filePath of [...layoutFiles, ...componentFiles]) {
       if (fs.existsSync(filePath)) {
         hash.update(filePath)
         hash.update(fs.readFileSync(filePath, 'utf8'))
@@ -315,14 +315,14 @@ export class ConfigService {
 
     const availableSchemas = SchemaOrgTypeEnum.options
 
-    const templateNames = this.getTemplates()
+    const layoutNames = this.getLayouts()
     const componentNames = this.getComponents()
 
-    const templateRelationField: CMSField = {
-      name: 'template',
-      label: 'template',
+    const layoutRelationField: CMSField = {
+      name: 'layout',
+      label: 'layout',
       widget: 'relation',
-      collection: 'templates',
+      collection: 'layouts',
       search_fields: ['slug'],
       value_field: '{{slug}}',
       display_fields: ['slug'],
@@ -361,8 +361,8 @@ export class ConfigService {
         ...getSchemaFields(col.schemaType),
         { name: 'body', label: 'body', widget: 'markdown', i18n: true }
       ]
-      const templateFields = this.getTemplateFields(col.template)
-      const mergedFields = this.mergeCmsFields(fields, templateFields)
+      const layoutFields = this.getLayoutFields(col.layout)
+      const mergedFields = this.mergeCmsFields(fields, layoutFields)
 
     const taxonomyTargets = Array.isArray(col.taxonomyOf) ? col.taxonomyOf : []
     for (const target of taxonomyTargets) {
@@ -405,6 +405,8 @@ export class ConfigService {
       }
     }
 
+    config.collections.push({ divider: true })
+
     // Generar colección de singles
     if (taiaConfig.singles.length > 0) {
       config.collections.push({
@@ -414,11 +416,11 @@ export class ConfigService {
         i18n: true,
         editor: { preview: false },
         files: taiaConfig.singles.map((page) => {
-          const templateFields = this.getTemplateFields(page.template)
+          const layoutFields = this.getLayoutFields(page.layout)
           const fields = this.mergeCmsFields([
             ...getSchemaFields(page.schemaType),
             { name: 'body', label: 'body', widget: 'markdown', required: false, i18n: true }
-          ], templateFields)
+          ], layoutFields)
 
           return {
             name: page.id,
@@ -434,12 +436,14 @@ export class ConfigService {
       })
     }
 
-    if (templateNames.length > 0) {
+    config.collections.push({ divider: true })
+
+    if (layoutNames.length > 0) {
       config.collections.push({
-        name: 'templates',
-        label: 'templates',
-        label_singular: 'template',
-        folder: 'templates',
+        name: 'layouts',
+        label: 'layouts',
+        label_singular: 'layout',
+        folder: 'layouts',
         icon: 'castle',
         create: true,
         slug: '{{slug}}',
@@ -472,6 +476,8 @@ export class ConfigService {
     
     const globalsFields = this.buildGlobalsFields(cmsLocale)
 
+    config.collections.push({ divider: true })
+
     // Configuración editable
     config.collections.push({
       name: 'settings',
@@ -483,7 +489,7 @@ export class ConfigService {
           name: 'general',
           label: 'general',
           icon: 'build',
-          file: 'content/settings.yml',
+          file: 'content/config.yml',
           i18n: false,
           editor: { preview: false },
           fields: [
@@ -534,7 +540,7 @@ export class ConfigService {
                 { name: 'singular', label: 'singular', widget: 'string', required: false },
                 iconField,
                 { name: 'schemaType', label: 'schemaType', widget: 'select',  options: availableSchemas },
-                templateRelationField,
+                layoutRelationField,
                 taxonomyOfField
               ]
             },
@@ -550,7 +556,7 @@ export class ConfigService {
                 { name: 'label', label: 'label', widget: 'string' },
                 iconField,
                 { name: 'schemaType', label: 'schemaType', widget: 'select',  options: availableSchemas  },
-                templateRelationField
+                layoutRelationField
               ]
             }
           ]
@@ -704,7 +710,7 @@ export class ConfigService {
 
   private buildGlobalsFields (_cmsLocale: string): CMSField[] {
     const sources = [
-      ...this.getTemplates().map((name) => path.join(this.projectRoot, 'templates', `${name}.astro`)),
+      ...this.getLayouts().map((name) => path.join(this.projectRoot, 'layouts', `${name}.astro`)),
       ...this.getComponents().map((name) => path.join(this.projectRoot, 'components', `${name}.astro`))
     ]
 

@@ -15,7 +15,7 @@ TAIA (Technical AI Agency) is an agentic system designed to act as a full-servic
 taia-pilot/          # Demo project
 │── content/         # CMS-editable content
 │── components/      # Project components
-│── templates/       # Astro templates
+│── layouts/         # Astro content layouts
 │── uploads/         # CMS uploads
 ├── public/          # Build-time assets (favicons)
 └── core/            # Reusable foundation like git submodule (from github.com/seacomoseo/taia-core)

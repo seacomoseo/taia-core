@@ -77,14 +77,14 @@ labels:
   lang: Language
   cmsLocale: CMS language
   collections: Collections
-  singles: Single pages
-  single: Single page
+  singles: Single Pages
+  single: Single Page
   id: ID
   label: Label
   singular: Singular
   icon: Icon
   schemaType: Schema type
-  template: Template
+  layout: Layout
   taxonomyOf: Taxonomy of
   collectionId: Collection
   collection: Collection
@@ -103,12 +103,14 @@ hints:
   languages: Language code [ISO-639-1](https://es.wikipedia.org/wiki/ISO_639-1) + optional regional variant [ISO 3166-1](https://es.wikipedia.org/wiki/ISO_3166-1)
 collections:
   settings: Settings
-  templates: Templates
-  templates.singular: Template
+  layouts: Layouts
+  layouts.singular: Layout
   components: Components
   components.singular: Component
-  singles: Single pages
-  globals: Global texts
+  singles: Single Pages
+  pages: Simple Pages
+  pages.singular: Simple Page
+  globals: Global Texts
 files:
   settings.general: General
-  settings.globals: Global texts
+  settings.globals: Global Texts

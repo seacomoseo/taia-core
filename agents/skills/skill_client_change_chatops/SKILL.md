@@ -22,7 +22,7 @@ Convert client chat requests into reliable engineering actions.
 1. Parse request into objective, scope, constraints, and acceptance criteria.
 2. Restrict implementation scope to:
    - `content/`
-   - `templates/`
+   - `layouts/`
    - `components/`
    - `uploads/`
 3. Generate task breakdown and risk notes.
