@@ -167,3 +167,13 @@ Short traceability log for behavior changes inside `core/`.
   - `core/docs/COMPONENT_CATALOG.md`
 - Why: provide a reusable, discoverable language navigation pattern without duplicating logic across projects.
 - Follow-up: add optional language-specific slug mapping when localized routes diverge beyond prefix changes.
+
+## 2026-02-19 - Shared localized route mapping for switcher and hreflang
+
+- Change: extracted localized route resolution into `LanguageRouteService`, reused it in `LanguageSwitcher`, and added automatic hreflang/x-default alternates in `BaseLayout`.
+- Impacted paths:
+  - `core/src/services/language-route-service.ts`
+  - `core/src/components/LanguageSwitcher.astro`
+  - `core/src/layouts/BaseLayout.astro`
+- Why: prevent locale switch 404s on translated slugs and keep language switch + SEO alternate tags consistent from a single mapping source.
+- Follow-up: optionally cache generated route maps by content hash instead of process lifetime in long-running runtimes.

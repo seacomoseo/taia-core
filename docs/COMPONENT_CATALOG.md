@@ -6,7 +6,7 @@ Reusable UI primitives available from `@core/components/*`.
 
 - `Header` and `Footer` - core default chrome components (overridable from project components).
 - `SmartLink` - internal/external logic, obfuscation options (`obfuscate`, `obfuscateOutsideHome`), email action UX.
-- `LanguageSwitcher` - reusable language switcher with desktop pills and compact variant for footer.
+- `LanguageSwitcher` - reusable language switcher with desktop pills and compact variant for footer; resolves translated localized slugs through shared route mapping.
 - `MaterialIcon` - Material Symbols wrapper with self-hosted font support.
 
 ## Content and structure
@@ -36,4 +36,4 @@ Reusable UI primitives available from `@core/components/*`.
 
 ## Accessibility and layout baseline
 
-- `SeoHead`, `SkipLink`, `FocusOutlines`, `BaseLayout`, `PageLayout`, `CollectionLayout`.
+- `SeoHead`, `SkipLink`, `FocusOutlines`, `BaseLayout`, `PageLayout`, `CollectionLayout` (`BaseLayout` auto-generates hreflang + `x-default` alternates when not passed explicitly).

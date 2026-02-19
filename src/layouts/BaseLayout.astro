@@ -4,6 +4,7 @@ import SkipLink from '../components/SkipLink.astro'
 import FocusOutlines from '../components/FocusOutlines.astro'
 import '../styles/tailwind.css'
 import { ConfigService } from '../services/config-service'
+import { LanguageRouteService } from '../services/language-route-service'
 import type { JsonLd } from '../schemas/seo'
 
 interface Props {
@@ -58,6 +59,26 @@ const faviconSource = taiaConfig.faviconSource || ''
 const hasSvgFavicon = faviconSource.endsWith('.svg')
 const baseBodyClass = 'min-h-screen text-[var(--color-text)] antialiased'
 const isProd = import.meta.env.PROD
+const routeService = new LanguageRouteService(process.cwd())
+const routeDefaultLang = routeService.getDefaultLanguage()
+
+const resolvedAlternates = alternates.length > 0
+  ? alternates
+  : routeService.getLanguages().map((targetLang) => {
+      const localizedPath = routeService.resolveLocalizedPath(Astro.url.pathname, locale, targetLang)
+      return {
+        hreflang: targetLang,
+        href: new URL(localizedPath, Astro.url).href
+      }
+    })
+
+if (!resolvedAlternates.some((item) => item.hreflang === 'x-default')) {
+  const xDefaultPath = routeService.resolveLocalizedPath(Astro.url.pathname, locale, routeDefaultLang)
+  resolvedAlternates.push({
+    hreflang: 'x-default',
+    href: new URL(xDefaultPath, Astro.url).href
+  })
+}
 
 const runtimeCssVars: string[] = []
 if (stylesConfig.colors?.accent) runtimeCssVars.push(`--color-accent:${stylesConfig.colors.accent};--color-accent-hover:${stylesConfig.colors.accent};`)
@@ -100,7 +121,7 @@ const runtimeCssVarBlock = runtimeCssVars.length > 0 ? `:root{${runtimeCssVars.j
       modifiedTime={modifiedTime}
       author={author}
       jsonLd={jsonLd}
-      alternates={alternates}
+      alternates={resolvedAlternates}
     />
 
     <FocusOutlines />
