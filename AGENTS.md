@@ -106,6 +106,7 @@ If instructions conflict, follow the higher level and document tradeoffs.
 - `core/agents/skills/*` are executable playbooks.
 - `core/docs/*` are reference rails and deep context.
 - `core/docs/IMPLEMENTATION_STACK.md` documents Astro + Sveltia + Tailwind setup details.
+- `core/docs/COMPONENT_CATALOG.md` lists reusable core components and intended usage.
 - Update all affected layers when system behavior changes.
 
 ## Core Change Tracking Protocol

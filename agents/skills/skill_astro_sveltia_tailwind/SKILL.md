@@ -26,6 +26,7 @@ Use this skill to keep implementation consistent with the project's core stack c
 4. Only introduce custom CSS when utility classes cannot express a needed behavior.
 5. Preserve accessibility, SEO, and performance rails.
 6. Prefer reusable core components before creating project-specific duplicates (links, media, FAQ, reviews, TOC, galleries, forms, maps).
+7. Review `core/docs/COMPONENT_CATALOG.md` before introducing new UI primitives.
 
 ## Outputs
 

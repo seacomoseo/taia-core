@@ -629,10 +629,11 @@ export class ConfigService {
           icon: 'alt_route',
           file: 'content/redirects.yml',
           i18n: false,
+          root: true,
           editor: { preview: false },
           fields: [
             {
-              name: 'redirects',
+              name: 'items',
               label: 'redirects',
               label_singular: 'redirect',
               widget: 'list',
@@ -649,7 +650,7 @@ export class ConfigService {
         {
           name: 'robots',
           label: 'robots',
-          icon: 'robot_2',
+          icon: 'smart_toy',
           file: 'content/robots.txt',
           i18n: false,
           format: 'raw',
@@ -661,7 +662,7 @@ export class ConfigService {
         {
           name: 'llms',
           label: 'llms',
-          icon: 'smart_toy',
+          icon: 'network_intel_node',
           file: 'content/llms.txt',
           i18n: false,
           format: 'raw',
@@ -815,6 +816,10 @@ export class ConfigService {
     ]
 
     const shape: Record<string, any> = {}
+    const localizedLabels = {
+      es: this.flattenGlobalsLabels('es'),
+      en: this.flattenGlobalsLabels('en')
+    }
 
     for (const filePath of sources) {
       if (!fs.existsSync(filePath)) continue
@@ -830,7 +835,7 @@ export class ConfigService {
       }
     }
 
-    return this.shapeToFields(shape, [])
+    return this.shapeToFields(shape, [], localizedLabels)
   }
 
   private extractTranslationKeys (source: string): string[] {
@@ -931,10 +936,14 @@ export class ConfigService {
     }
   }
 
-  private shapeToFields (shape: Record<string, any>, pathParts: string[]): CMSField[] {
+  private shapeToFields (shape: Record<string, any>, pathParts: string[], localizedLabels: { es: Record<string, string>; en: Record<string, string> }): CMSField[] {
     return Object.entries(shape).map(([key, value]) => {
       const fieldPath = [...pathParts, key]
-      const label = { es: key, en: key }
+      const pathKey = fieldPath.join('.')
+      const label = {
+        es: localizedLabels.es[pathKey] || this.humanizeKey(key),
+        en: localizedLabels.en[pathKey] || this.humanizeKey(key)
+      }
 
       if (Array.isArray(value)) {
         const itemShape = value[0] ?? 'string'
@@ -943,7 +952,7 @@ export class ConfigService {
             name: key,
             label,
             widget: 'list',
-            fields: this.shapeToFields(itemShape, fieldPath),
+            fields: this.shapeToFields(itemShape, fieldPath, localizedLabels),
             i18n: true
           }, true)
         }
@@ -951,7 +960,7 @@ export class ConfigService {
           name: key,
           label,
           widget: 'list',
-          field: this.buildFieldFromValue('item', itemShape, fieldPath),
+          field: this.buildFieldFromValue('item', itemShape, fieldPath, localizedLabels),
           i18n: true
         }, true)
       }
@@ -969,33 +978,78 @@ export class ConfigService {
           name: key,
           label,
           widget: 'object',
-          fields: this.shapeToFields(value, fieldPath),
+          fields: this.shapeToFields(value, fieldPath, localizedLabels),
           i18n: true
         }, true)
       }
 
-      return this.buildFieldFromValue(key, value, fieldPath)
+      return this.buildFieldFromValue(key, value, fieldPath, localizedLabels)
     })
   }
 
-  private buildFieldFromValue (name: string, value: any, pathParts: string[]): CMSField {
+  private buildFieldFromValue (name: string, value: any, pathParts: string[], localizedLabels: { es: Record<string, string>; en: Record<string, string> }): CMSField {
     if (value && typeof value === 'object' && 'widget' in value) {
       const field = value as CMSField
       const normalized = this.normalizeProjectField(field, pathParts)
+      const pathKey = pathParts.join('.')
       return this.applyCmsFieldDefaults({
         ...normalized,
         name: normalized.name || name,
-        label: normalized.label || { es: name, en: name }
+        label: normalized.label || {
+          es: localizedLabels.es[pathKey] || this.humanizeKey(name),
+          en: localizedLabels.en[pathKey] || this.humanizeKey(name)
+        }
       }, true)
     }
 
     const widget = this.resolveWidget(value)
+    const pathKey = pathParts.join('.')
     return this.applyCmsFieldDefaults({
       name,
-      label: { es: name, en: name },
+      label: {
+        es: localizedLabels.es[pathKey] || this.humanizeKey(name),
+        en: localizedLabels.en[pathKey] || this.humanizeKey(name)
+      },
       widget,
       i18n: true
     }, true)
+  }
+
+  private flattenGlobalsLabels (locale: string): Record<string, string> {
+    const filePath = path.join(this.projectRoot, 'content', 'globals', `${locale}.yml`)
+    if (!fs.existsSync(filePath)) return {}
+
+    try {
+      const raw = fs.readFileSync(filePath, 'utf8')
+      const data = (yaml.load(raw) as Record<string, any>) || {}
+      const result: Record<string, string> = {}
+      this.flattenObjectStrings(data, [], result)
+      return result
+    } catch {
+      return {}
+    }
+  }
+
+  private flattenObjectStrings (value: any, pathParts: string[], target: Record<string, string>): void {
+    if (Array.isArray(value)) return
+    if (!value || typeof value !== 'object') return
+    for (const [key, nested] of Object.entries(value)) {
+      const nextPath = [...pathParts, key]
+      if (typeof nested === 'string') {
+        target[nextPath.join('.')] = nested
+      } else if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+        this.flattenObjectStrings(nested, nextPath, target)
+      }
+    }
+  }
+
+  private humanizeKey (key: string): string {
+    return key
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/^./, (value) => value.toUpperCase())
   }
 
   private applyCmsFieldDefaults (field: CMSField, enforceI18n = false): CMSField {

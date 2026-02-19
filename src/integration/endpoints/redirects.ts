@@ -18,16 +18,18 @@ export const GET: APIRoute = async () => {
   }
 
   const raw = fs.readFileSync(filePath, 'utf8')
-  const parsed = (yaml.load(raw) as { redirects?: RedirectRule[] } | RedirectRule[] | null) || null
+  const parsed = (yaml.load(raw) as { redirects?: RedirectRule[]; items?: RedirectRule[] } | RedirectRule[] | null) || null
   const redirects = Array.isArray(parsed)
     ? parsed
     : Array.isArray(parsed?.redirects)
       ? parsed.redirects
+      : Array.isArray((parsed as any)?.items)
+        ? (parsed as any).items
       : []
 
   const body = redirects
-    .filter((rule) => rule && typeof rule.from === 'string' && typeof rule.to === 'string')
-    .map((rule) => `${rule.from} ${rule.to} ${Number(rule.type) || 301}`)
+    .filter((rule: RedirectRule) => rule && typeof rule.from === 'string' && typeof rule.to === 'string')
+    .map((rule: RedirectRule) => `${rule.from} ${rule.to} ${Number(rule.type) || 301}`)
     .join('\n')
 
   return new Response(body, {
