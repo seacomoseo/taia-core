@@ -1,68 +1,106 @@
 import type { APIRoute } from 'astro'
-import fs from 'node:fs'
-import path from 'node:path'
-import yaml from 'js-yaml'
 import { ConfigService } from '../../services/config-service'
+import { SitemapService, type SitemapNode } from '../../services/sitemap-service'
+import { LanguageRouteService } from '../../services/language-route-service'
 
 interface RouteEntry {
   loc: string
   lastmod?: string | undefined
+  alternates: Array<{ hreflang: string; href: string }>
 }
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ url }) => {
   const configService = new ConfigService(process.cwd())
+  const sitemapService = new SitemapService(process.cwd())
+  const routeService = new LanguageRouteService(process.cwd())
   const config = configService.getTaiaConfig()
-  const baseUrl = (config.siteUrl || '').replace(/\/$/, '')
+  const baseUrl = (config.siteUrl || url.origin).replace(/\/$/, '')
   const defaultLang = configService.getDefaultLanguage()
+  const languages = Array.from(new Set(config.languages || [defaultLang]))
+
+  const indexableByLang = new Map<string, Set<string>>()
+  const lastmodByLang = new Map<string, Map<string, string>>()
+
+  const collectNodes = (node: SitemapNode | undefined, target: SitemapNode[]) => {
+    if (node) target.push(node)
+  }
+
+  for (const lang of languages) {
+    const model = sitemapService.buildModel(lang)
+    const nodes: SitemapNode[] = []
+    collectNodes(model.singlesIndex, nodes)
+    nodes.push(...model.singles)
+    for (const group of model.groups) {
+      collectNodes(group.node, nodes)
+      nodes.push(...group.children)
+    }
+
+    const indexable = new Set<string>()
+    const lastmodMap = new Map<string, string>()
+    for (const node of nodes) {
+      if (node.noindex) continue
+      indexable.add(node.path)
+      if (node.lastmod) lastmodMap.set(node.path, node.lastmod)
+    }
+    indexableByLang.set(lang, indexable)
+    lastmodByLang.set(lang, lastmodMap)
+  }
 
   const routes = new Map<string, RouteEntry>()
 
-  const addRoute = (urlPath: string, lastmod?: string) => {
+  const addRoute = (lang: string, urlPath: string, lastmod?: string) => {
     const normalized = urlPath.startsWith('/') ? urlPath : `/${urlPath}`
     const loc = baseUrl ? `${baseUrl}${normalized}` : normalized
-    routes.set(loc, { loc, lastmod })
-  }
+    const alternates = languages
+      .map((targetLang) => {
+        const targetPath = routeService.resolveLocalizedPath(normalized, lang, targetLang)
+        if (!indexableByLang.get(targetLang)?.has(targetPath)) return null
+        return {
+          hreflang: targetLang,
+          href: `${baseUrl}${targetPath}`
+        }
+      })
+      .filter(Boolean) as Array<{ hreflang: string; href: string }>
 
-  for (const lang of config.languages) {
-    const langPrefix = lang === defaultLang ? '' : `/${lang}`
-
-    for (const single of config.singles) {
-      const slug = configService.getSingleSlug(single, lang)
-      addRoute(`${langPrefix}/${slug}`.replace(/\/+/g, '/').replace(/\/$/, '') || '/')
+    const xDefaultPath = routeService.resolveLocalizedPath(normalized, lang, defaultLang)
+    if (indexableByLang.get(defaultLang)?.has(xDefaultPath)) {
+      alternates.push({ hreflang: 'x-default', href: `${baseUrl}${xDefaultPath}` })
+    } else {
+      const firstAlternate = alternates[0]
+      if (firstAlternate) {
+        alternates.push({ hreflang: 'x-default', href: firstAlternate.href })
+      }
     }
 
-    for (const col of config.collections) {
-      const folder = path.join(process.cwd(), 'content', col.id)
-      if (!fs.existsSync(folder)) continue
+    routes.set(loc, {
+      loc,
+      ...(lastmod ? { lastmod } : {}),
+      alternates
+    })
+  }
 
-      const landing = configService.getCollectionSlug(col, lang)
-      if (landing) addRoute(`${langPrefix}/${landing}`.replace(/\/+/g, '/'))
-
-      const entries = fs.readdirSync(folder).filter((file) => /\.mdx?$/.test(file) && !file.startsWith('_index.'))
-      for (const file of entries) {
-        if (!file.endsWith(`.${lang}.md`) && !file.endsWith(`.${lang}.mdx`)) continue
-        const filePath = path.join(folder, file)
-        const source = fs.readFileSync(filePath, 'utf8')
-        const frontmatterMatch = source.match(/^---\n([\s\S]*?)\n---/)
-        const frontmatter = frontmatterMatch ? (yaml.load(frontmatterMatch[1] || '') as Record<string, any>) : {}
-        const rawSlug = typeof frontmatter?.slug === 'string' && frontmatter.slug.trim()
-          ? frontmatter.slug.trim()
-          : file.replace(/\.[a-zA-Z-]+\.mdx?$/, '')
-        const prefix = configService.getCollectionPrefix(col, lang)
-        const urlPath = `/${[langPrefix.replace(/^\//, ''), prefix, rawSlug].filter(Boolean).join('/')}`
-        addRoute(urlPath, typeof frontmatter?.updatedAt === 'string' ? frontmatter.updatedAt : undefined)
-      }
+  for (const lang of languages) {
+    const paths = Array.from(indexableByLang.get(lang) || [])
+    const lastmodMap = lastmodByLang.get(lang) || new Map<string, string>()
+    for (const routePath of paths) {
+      addRoute(lang, routePath, lastmodMap.get(routePath))
     }
   }
 
   const urlsXml = Array.from(routes.values())
+    .sort((a, b) => a.loc.localeCompare(b.loc))
     .map((route) => {
-      const lastmod = route.lastmod ? `<lastmod>${new Date(route.lastmod).toISOString()}</lastmod>` : ''
-      return `<url><loc>${escapeXml(route.loc)}</loc>${lastmod}</url>`
+      const lastmod = route.lastmod ? `<lastmod>${escapeXml(route.lastmod)}</lastmod>` : ''
+      const alternateLinks = route.alternates
+        .filter((alt, index, all) => all.findIndex((candidate) => candidate.hreflang === alt.hreflang) === index)
+        .sort((a, b) => a.hreflang.localeCompare(b.hreflang))
+        .map((alt) => `<xhtml:link rel="alternate" hreflang="${escapeXml(alt.hreflang)}" href="${escapeXml(alt.href)}" />`)
+        .join('')
+      return `<url><loc>${escapeXml(route.loc)}</loc>${lastmod}${alternateLinks}</url>`
     })
     .join('')
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlsXml}</urlset>`
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${urlsXml}</urlset>`
 
   return new Response(xml, {
     headers: {

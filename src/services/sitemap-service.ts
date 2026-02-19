@@ -8,6 +8,7 @@ export interface SitemapNode {
   title: string
   path: string
   noindex: boolean
+  lastmod?: string
   sortOrder?: number
   sortDate?: number
 }
@@ -101,10 +102,12 @@ export class SitemapService {
       const slug = this.configService.getSingleSlug(single, lang)
       const singlePath = path.join(this.projectRoot, 'content', 'singles', `${single.id}.${lang}.md`)
       const frontmatter = this.readFrontmatter(singlePath)
+      const singleLastmod = this.getLastmod(frontmatter)
       singles.push({
         title: typeof frontmatter?.title === 'string' ? frontmatter.title : single.label,
         path: slug ? this.normalizeRoute(`${langPrefix}/${slug}`) : this.normalizeRoute(langPrefix || '/'),
-        noindex: this.isNoindex(frontmatter)
+        noindex: this.isNoindex(frontmatter),
+        ...(singleLastmod ? { lastmod: singleLastmod } : {})
       })
     }
 
@@ -114,13 +117,15 @@ export class SitemapService {
 
       const indexPath = path.join(folder, `_index.${lang}.md`)
       const indexFrontmatter = this.readFrontmatter(indexPath)
+      const landingLastmod = this.getLastmod(indexFrontmatter)
       const groupTitle = typeof indexFrontmatter?.title === 'string' ? indexFrontmatter.title : col.label
       const landingSlug = this.configService.getCollectionSlug(col, lang)
       const landingNode = landingSlug
         ? {
             title: groupTitle,
             path: this.normalizeRoute(`${langPrefix}/${landingSlug}`),
-            noindex: this.isNoindex(indexFrontmatter)
+            noindex: this.isNoindex(indexFrontmatter),
+            ...(landingLastmod ? { lastmod: landingLastmod } : {})
           }
         : undefined
 
@@ -136,10 +141,12 @@ export class SitemapService {
         const entryPrefix = this.configService.getCollectionPrefix(col, lang)
 
         const dateValue = this.getNodeDate(frontmatter)
+        const entryLastmod = this.getLastmod(frontmatter)
         children.push({
           title: typeof frontmatter?.title === 'string' ? frontmatter.title : file,
           path: this.normalizeRoute(`${langPrefix}/${[entryPrefix, slug].filter(Boolean).join('/')}`),
           noindex: this.isNoindex(frontmatter),
+          ...(entryLastmod ? { lastmod: entryLastmod } : {}),
           ...(typeof frontmatter?.order === 'number' ? { sortOrder: frontmatter.order } : {}),
           ...(typeof dateValue === 'number' ? { sortDate: dateValue } : {})
         })
@@ -171,11 +178,22 @@ export class SitemapService {
     const slug = typeof frontmatter?.slug === 'string' && frontmatter.slug.trim()
       ? frontmatter.slug.trim()
       : 'singles'
+    const singlesIndexLastmod = this.getLastmod(frontmatter)
     return {
       title: typeof frontmatter?.title === 'string' ? frontmatter.title : 'Pages',
       path: this.normalizeRoute(`${langPrefix}/${slug}`),
-      noindex: this.isNoindex(frontmatter)
+      noindex: this.isNoindex(frontmatter),
+      ...(singlesIndexLastmod ? { lastmod: singlesIndexLastmod } : {})
     }
+  }
+
+  private getLastmod (frontmatter: Record<string, any>): string | undefined {
+    const candidates = [frontmatter?.updatedAt, frontmatter?.modifiedAt, frontmatter?.publishedAt, frontmatter?.date, frontmatter?.startDate]
+    const raw = candidates.find((value) => typeof value === 'string' || value instanceof Date)
+    if (!raw) return undefined
+    const value = new Date(raw)
+    if (Number.isNaN(value.getTime())) return undefined
+    return value.toISOString()
   }
 
   private hasDateField (schemaType: string): boolean {

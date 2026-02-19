@@ -177,3 +177,12 @@ Short traceability log for behavior changes inside `core/`.
   - `core/src/layouts/BaseLayout.astro`
 - Why: prevent locale switch 404s on translated slugs and keep language switch + SEO alternate tags consistent from a single mapping source.
 - Follow-up: optionally cache generated route maps by content hash instead of process lifetime in long-running runtimes.
+
+## 2026-02-19 - XML sitemap indexability and hreflang optimization
+
+- Change: updated XML sitemap generation to exclude `seo.noindex` pages, add `xhtml:link` hreflang alternates per URL, include `x-default`, and output stable sorted entries with absolute URLs.
+- Impacted paths:
+  - `core/src/integration/endpoints/sitemap-xml.ts`
+  - `core/src/services/sitemap-service.ts`
+- Why: align sitemap output with indexable canonicals only and strengthen multilingual discovery with route-safe alternate mapping.
+- Follow-up: split into sitemap index files if URL volume grows near protocol limits.
