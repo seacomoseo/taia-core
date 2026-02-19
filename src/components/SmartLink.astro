@@ -10,6 +10,7 @@ interface Props {
   prefetch?: boolean | 'hover' | 'viewport' | 'load'
   class?: string
   obfuscate?: boolean
+  obfuscateOutsideHome?: boolean
   appearance?: 'text' | 'button' | 'ghost' | 'dot'
   icon?: string
   emailActions?: boolean
@@ -25,6 +26,7 @@ const {
   prefetch = true,
   class: className,
   obfuscate = false,
+  obfuscateOutsideHome = false,
   appearance = 'text',
   icon,
   emailActions = true,
@@ -81,6 +83,16 @@ const prefetchValue = computePrefetch()
 const currentPath = Astro.url.pathname
 const isCurrentPage = !isExternal && href === currentPath
 
+const isHomePath = (pathname: string): boolean => {
+  const normalized = pathname.replace(/\/+$/, '') || '/'
+  if (normalized === '/') return true
+  const segments = normalized.split('/').filter(Boolean)
+  if (segments.length !== 1) return false
+  return /^[a-z]{2}(?:-[A-Za-z]{2})?$/.test(segments[0] || '')
+}
+
+const resolvedObfuscate = obfuscate || (obfuscateOutsideHome && !isHomePath(currentPath))
+
 const hasEmailUi = emailActions && isMailto
 
 const encodedPayload = Buffer.from(
@@ -97,7 +109,7 @@ const appearanceClass = {
 const classes = [appearanceClass, className].filter(Boolean).join(' ')
 ---
 
-{obfuscate
+{resolvedObfuscate
   ? (
     <button
       type='button'
@@ -109,7 +121,7 @@ const classes = [appearanceClass, className].filter(Boolean).join(' ')
       data-email-actions={hasEmailUi ? 'true' : undefined}
       data-link-title={title || ariaLabel || ''}
       data-contact-track
-      data-contact-label={obfuscate ? undefined : href}
+      data-contact-label={resolvedObfuscate ? undefined : href}
       data-contact-manual='true'
     >
       {icon && <span class='material-symbols-rounded taia-icon' aria-hidden='true'>{icon}</span>}

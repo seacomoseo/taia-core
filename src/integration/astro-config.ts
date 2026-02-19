@@ -5,6 +5,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import yaml from 'js-yaml'
 import astroBaseConfig from '../../configs/astro.base.mjs'
+import { createRemarkShortcodesPlugin } from '../markdown/remark-shortcodes'
 
 export interface TaiaAstroConfigOptions {
   projectRoot?: string
@@ -52,6 +53,13 @@ export function createTaiaAstroConfig (options: TaiaAstroConfigOptions = {}) {
     output: options.output ?? 'server',
     ...(resolvedAdapter ? { adapter: resolvedAdapter } : {}),
     ...(options.integrations !== undefined ? { integrations: options.integrations } : {}),
-    ...(resolvedSite ? { site: resolvedSite } : {})
+    ...(resolvedSite ? { site: resolvedSite } : {}),
+    markdown: {
+      ...(astroBaseConfig.markdown || {}),
+      remarkPlugins: [
+        ...((astroBaseConfig.markdown?.remarkPlugins as any[]) || []),
+        createRemarkShortcodesPlugin(projectRoot)
+      ]
+    }
   } as AstroUserConfig)
 }

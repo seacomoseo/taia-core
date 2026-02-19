@@ -1,5 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro'
+import Header from '@core/components/Header.astro'
+import Footer from '@core/components/Footer.astro'
 
 interface Props {
   entry: any
@@ -24,10 +26,12 @@ const imageAlt = entry?.data?.imageAlt
   locale={lang}
   noindex={noindex}
 >
+  <Header lang={lang} />
   <main id='main-content' class='mx-auto w-full max-w-5xl px-6 py-12 md:px-12'>
     <article class='taia-content taia-surface p-6 md:p-10'>
       {entry?.data?.title && <h1 class='taia-section-title mb-4 text-4xl text-balance md:text-5xl'>{entry.data.title}</h1>}
       <slot />
     </article>
   </main>
+  <Footer lang={lang} />
 </BaseLayout>

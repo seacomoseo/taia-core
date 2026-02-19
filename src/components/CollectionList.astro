@@ -7,7 +7,7 @@ interface Props {
   collection: string
   lang?: string
   limit?: number
-  orderBy?: 'title' | 'date'
+  orderBy?: 'auto' | 'title' | 'date' | 'order'
   order?: 'asc' | 'desc'
   class?: string
 }
@@ -16,8 +16,8 @@ const {
   collection,
   lang,
   limit,
-  orderBy = 'date',
-  order = 'desc',
+  orderBy = 'auto',
+  order,
   class: className
 } = Astro.props as Props
 
@@ -26,6 +26,7 @@ const defaultLang = configService.getDefaultLanguage()
 const resolvedLang = lang || defaultLang
 const collectionConfig = configService.getTaiaConfig().collections.find((item) => item.id === collection)
 const prefix = collectionConfig ? configService.getCollectionPrefix(collectionConfig, resolvedLang) : collection
+const hasDateField = ['Article', 'BlogPosting', 'NewsArticle', 'Event'].includes(collectionConfig?.schemaType || '')
 const splitSlug = (value: string): { base: string; lang?: string } => {
   const match = value.match(/^(.*)\.([a-zA-Z-]+)$/)
   if (!match?.[1]) return { base: value }
@@ -33,6 +34,20 @@ const splitSlug = (value: string): { base: string; lang?: string } => {
 }
 
 const allItems = await getCollection(collection as any)
+const getDateValue = (item: any): number => {
+  const raw = item?.data?.publishedAt || item?.data?.startDate || item?.data?.date || item?.data?.modifiedAt
+  const value = new Date(raw || 0).getTime()
+  return Number.isFinite(value) ? value : 0
+}
+
+const getOrderValue = (item: any): number => {
+  const raw = item?.data?.order
+  return typeof raw === 'number' ? raw : 0
+}
+
+const resolvedOrderBy = orderBy === 'auto' ? (hasDateField ? 'date' : 'order') : orderBy
+const resolvedDirection = order || (resolvedOrderBy === 'order' ? 'asc' : 'desc')
+
 const filtered = allItems
   .filter((item: any) => {
     const id = item?.id || ''
@@ -41,11 +56,19 @@ const filtered = allItems
     return base !== '_index' && currentLang === resolvedLang
   })
   .sort((a: any, b: any) => {
-    const aValue = orderBy === 'date' ? new Date(a.data?.publishedAt || 0).getTime() : String(a.data?.title || '')
-    const bValue = orderBy === 'date' ? new Date(b.data?.publishedAt || 0).getTime() : String(b.data?.title || '')
+    const aValue = resolvedOrderBy === 'date'
+      ? getDateValue(a)
+      : resolvedOrderBy === 'order'
+          ? getOrderValue(a)
+          : String(a.data?.title || '')
+    const bValue = resolvedOrderBy === 'date'
+      ? getDateValue(b)
+      : resolvedOrderBy === 'order'
+          ? getOrderValue(b)
+          : String(b.data?.title || '')
     if (aValue === bValue) return 0
     const result = aValue > bValue ? 1 : -1
-    return order === 'asc' ? result : -result
+    return resolvedDirection === 'asc' ? result : -result
   })
 
 const items = typeof limit === 'number' ? filtered.slice(0, limit) : filtered

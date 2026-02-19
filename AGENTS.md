@@ -33,6 +33,7 @@ If instructions conflict, follow the higher level and document tradeoffs.
 - Code and internal technical docs in English.
 - Client-facing deliverables in `/_context/` in Spanish by default.
 - Avoid overengineering; prefer simple, reversible decisions.
+- Never add literal Markdown `#` headings in `content/**/*.md`; page H1 must come from frontmatter `title` and layout rendering.
 
 ## Content and CMS Contract
 

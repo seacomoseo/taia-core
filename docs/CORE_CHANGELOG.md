@@ -95,3 +95,75 @@ Short traceability log for behavior changes inside `core/`.
   - `core/.github/workflows/astro-cloudflare-reusable.yml`
 - Why: centralize pipeline logic in core for easier maintenance across multiple projects.
 - Follow-up: version workflows with tags/SHAs in consumers and add release notes for workflow changes.
+
+## 2026-02-19 - Sitemap HTML UX and noindex-aware obfuscated links
+
+- Change: redesigned `/sitemap` HTML output with language switch, grouped hierarchy by collection, and obfuscated links for pages marked `seo.noindex`.
+- Impacted paths:
+  - `core/src/integration/endpoints/sitemap-page.ts`
+  - `components/Footer.astro`
+- Why: improve sitemap usability for humans, keep a clean hierarchy, and reduce authority transfer from noindex links in the human-facing map.
+- Follow-up: optionally add dedicated translated labels from globals for collection/single section titles.
+
+## 2026-02-19 - Localized sitemap routing and core chrome defaults
+
+- Change: sitemap page now serves both `/sitemap` and `/<lang>/sitemap`, with a nested tree structure (singles first) and neutral styling for noindex entries; added core `Header`/`Footer` components and wired them into core default layout.
+- Impacted paths:
+  - `core/src/integration/endpoints/sitemap-page.ts`
+  - `core/src/integration/taia-core.ts`
+  - `core/src/components/Header.astro`
+  - `core/src/components/Footer.astro`
+  - `core/src/layouts/default.astro`
+  - `core/src/components/index.ts`
+  - `core/docs/COMPONENT_CATALOG.md`
+- Why: improve URL consistency and provide reusable baseline chrome in core while keeping sitemap UX clean and hierarchical.
+- Follow-up: optionally expose sitemap title/subtitle through `content/globals/*` for full runtime copy control.
+
+## 2026-02-19 - Sitemap as content page with shared model
+
+- Change: moved human sitemap rendering to content page flow (`pages` collection/layout) using shared core model logic.
+- Impacted paths:
+  - `core/src/services/sitemap-service.ts`
+  - `core/src/integration/endpoints/sitemap-page.ts`
+  - `layouts/page.astro`
+  - `content/pages/sitemap.es.md`
+  - `content/pages/sitemap.en.md`
+- Why: allow full CMS-driven customization (title, slug, seo, body) while keeping a centralized generation model.
+- Follow-up: optionally cache sitemap model in memory during long-lived runtime processes.
+
+## 2026-02-19 - Markdown shortcode engine for sitemap and button links
+
+- Change: added markdown shortcode processing with `{{sitemap_tree}}` and button-style markdown links using `[[Label]](/url)`.
+- Impacted paths:
+  - `core/src/markdown/remark-shortcodes.ts`
+  - `core/src/integration/astro-config.ts`
+  - `core/src/styles/tailwind.css`
+  - `content/pages/sitemap.es.md`
+  - `content/pages/sitemap.en.md`
+- Why: keep sitemap placement/content editable from markdown while preserving static build performance and reusable syntax.
+- Follow-up: add more shortcodes under the same engine with a strict token registry.
+
+## 2026-02-19 - Markdown heading and shortcode styling policy
+
+- Change: removed shortcode-specific visual styling so shortcode output inherits markdown base styles; enforced no literal Markdown H1 policy in agent guidance and added build-time safeguard converting heading depth 1 to 2.
+- Impacted paths:
+  - `core/src/markdown/remark-shortcodes.ts`
+  - `core/src/styles/tailwind.css`
+  - `core/AGENTS.md`
+  - `content/**/*.md` (existing h1 normalized to h2)
+- Why: keep content rendering consistent with layout-driven H1 ownership and avoid hidden style coupling in shortcode output.
+- Follow-up: optionally add markdown lint checks for heading depth in CI.
+
+## 2026-02-19 - Reusable language switcher in header/footer
+
+- Change: introduced `LanguageSwitcher` core component and integrated it into both core and pilot header/footer for consistent multi-language navigation UX.
+- Impacted paths:
+  - `core/src/components/LanguageSwitcher.astro`
+  - `core/src/components/Header.astro`
+  - `core/src/components/Footer.astro`
+  - `components/Header.astro`
+  - `components/Footer.astro`
+  - `core/src/components/index.ts`
+  - `core/docs/COMPONENT_CATALOG.md`
+- Why: provide a reusable, discoverable language navigation pattern without duplicating logic across projects.
+- Follow-up: add optional language-specific slug mapping when localized routes diverge beyond prefix changes.

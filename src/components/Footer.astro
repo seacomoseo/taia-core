@@ -1,0 +1,30 @@
+---
+import SmartLink from './SmartLink.astro'
+import LanguageSwitcher from './LanguageSwitcher.astro'
+import { ConfigService } from '../services/config-service'
+import { localizePath } from '../utils/i18n'
+
+interface Props {
+  lang?: string
+}
+
+const { lang = 'es' } = Astro.props as Props
+const currentYear = new Date().getFullYear()
+const configService = new ConfigService(process.cwd())
+const defaultLang = configService.getDefaultLanguage()
+const siteName = configService.getTaiaConfig().siteName || 'TAIA'
+const sitemapPath = lang === 'en' ? '/sitemap' : '/mapa-web'
+---
+
+<footer class='mt-16 border-t border-[var(--color-border)] bg-[#132a3c] px-6 py-10 text-[#d7e3ef]'>
+  <div class='mx-auto flex max-w-[84rem] flex-col items-center justify-between gap-4 text-sm md:flex-row'>
+    <p class='m-0'>© {currentYear} {siteName}</p>
+    <div class='flex items-center gap-3'>
+      <LanguageSwitcher lang={lang} compact />
+      <SmartLink href={localizePath(sitemapPath, lang, defaultLang)} obfuscateOutsideHome icon='lan' title={lang === 'en' ? 'Site map' : 'Mapa del sitio'} aria-label={lang === 'en' ? 'Site map' : 'Mapa del sitio'} class='inline-flex h-5 w-5 items-center justify-center text-white/85 transition-colors hover:text-white' />
+      <SmartLink href='https://seacomoseo.com' obfuscateOutsideHome class='text-xs opacity-90 transition-colors hover:text-white'>
+        Diseño Web seacomoseo.com
+      </SmartLink>
+    </div>
+  </div>
+</footer>

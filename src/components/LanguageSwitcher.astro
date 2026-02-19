@@ -1,0 +1,201 @@
+---
+import fs from 'node:fs'
+import path from 'node:path'
+import yaml from 'js-yaml'
+import SmartLink from './SmartLink.astro'
+import { ConfigService } from '../services/config-service'
+
+interface Props {
+  lang?: string
+  compact?: boolean
+  class?: string
+}
+
+interface RouteMaps {
+  keyToRoute: Map<string, Map<string, string>>
+  routeToKey: Map<string, Map<string, string>>
+}
+
+const {
+  lang = 'es',
+  compact = false,
+  class: className
+} = Astro.props as Props
+
+const projectRoot = process.cwd()
+const configService = new ConfigService(projectRoot)
+const config = configService.getTaiaConfig()
+const defaultLang = configService.getDefaultLanguage()
+const languages = Array.from(new Set(config.languages || [defaultLang]))
+
+const normalizePath = (value: string): string => {
+  const normalized = value.replace(/\/+/g, '/')
+  return normalized.replace(/\/$/, '') || '/'
+}
+
+const getBasePath = (pathname: string): string => {
+  const normalized = normalizePath(pathname)
+  if (normalized === '/') return '/'
+  const parts = normalized.split('/').filter(Boolean)
+  const firstSegment = parts[0]
+  if (parts.length > 0 && firstSegment && languages.includes(firstSegment as string) && firstSegment !== defaultLang) {
+    const rest = parts.slice(1).join('/')
+    return rest ? `/${rest}` : '/'
+  }
+  return normalized
+}
+
+const toLocalePath = (basePath: string, locale: string): string => {
+  if (locale === defaultLang) return normalizePath(basePath)
+  if (basePath === '/') return `/${locale}`
+  return normalizePath(`/${locale}${basePath}`)
+}
+
+const readFrontmatter = (filePath: string): Record<string, any> => {
+  if (!fs.existsSync(filePath)) return {}
+  const source = fs.readFileSync(filePath, 'utf8')
+  const match = source.match(/^---\n([\s\S]*?)\n---/)
+  return match ? ((yaml.load(match[1] || '') as Record<string, any>) || {}) : {}
+}
+
+const buildRouteMaps = (): RouteMaps => {
+  const keyToRoute = new Map<string, Map<string, string>>()
+  const routeToKey = new Map<string, Map<string, string>>()
+
+  const setRoute = (locale: string, key: string, route: string) => {
+    if (!keyToRoute.has(locale)) keyToRoute.set(locale, new Map())
+    if (!routeToKey.has(locale)) routeToKey.set(locale, new Map())
+    keyToRoute.get(locale)?.set(key, route)
+    routeToKey.get(locale)?.set(route, key)
+  }
+
+  for (const locale of languages) {
+    const langPrefix = locale === defaultLang ? '' : `/${locale}`
+
+    for (const single of config.singles) {
+      const slug = configService.getSingleSlug(single, locale)
+      const route = slug ? normalizePath(`${langPrefix}/${slug}`) : normalizePath(langPrefix || '/')
+      setRoute(locale, `single:${single.id}`, route)
+    }
+
+    const singleIndexPath = path.join(projectRoot, 'content', 'singles', `_index.${locale}.md`)
+    if (fs.existsSync(singleIndexPath)) {
+      const fm = readFrontmatter(singleIndexPath)
+      const slug = typeof fm.slug === 'string' && fm.slug.trim() ? fm.slug.trim() : 'singles'
+      setRoute(locale, 'single:_index', normalizePath(`${langPrefix}/${slug}`))
+    }
+
+    for (const col of config.collections) {
+      const landing = configService.getCollectionSlug(col, locale)
+      if (landing) setRoute(locale, `collection:${col.id}:_index`, normalizePath(`${langPrefix}/${landing}`))
+
+      const folder = path.join(projectRoot, 'content', col.id)
+      if (!fs.existsSync(folder)) continue
+
+      const files = fs.readdirSync(folder).filter((file) => file.endsWith(`.${locale}.md`) || file.endsWith(`.${locale}.mdx`))
+      for (const file of files) {
+        if (file.startsWith('_index.')) continue
+        const base = file.replace(new RegExp(`\\.${locale}\\.mdx?$`), '')
+        const fm = readFrontmatter(path.join(folder, file))
+        const slug = typeof fm.slug === 'string' && fm.slug.trim() ? fm.slug.trim() : base
+        const prefix = configService.getCollectionPrefix(col, locale)
+        const route = normalizePath(`${langPrefix}/${[prefix, slug].filter(Boolean).join('/')}`)
+        setRoute(locale, `collection:${col.id}:${base}`, route)
+      }
+    }
+  }
+
+  return { keyToRoute, routeToKey }
+}
+
+const cacheKey = `${projectRoot}:${defaultLang}:${languages.join(',')}`
+const globalCache = (globalThis as any).__taiaLangRouteCache || ((globalThis as any).__taiaLangRouteCache = new Map<string, RouteMaps>())
+const routeMaps = globalCache.get(cacheKey) || (() => {
+  const value = buildRouteMaps()
+  globalCache.set(cacheKey, value)
+  return value
+})()
+
+const currentPath = normalizePath(Astro.url.pathname)
+const basePath = getBasePath(Astro.url.pathname)
+const routeKey = (routeMaps.routeToKey.get(lang) || new Map<string, string>()).get(currentPath)
+
+const links = languages.map((locale) => {
+  const localized = routeKey ? routeMaps.keyToRoute.get(locale)?.get(routeKey) : undefined
+  return {
+    locale,
+    href: localized || toLocalePath(basePath, locale),
+    active: locale === lang
+  }
+})
+
+const navLabel = lang === 'en' ? 'Language switcher' : 'Selector de idioma'
+---
+
+{languages.length > 1 && (
+  <nav aria-label={navLabel} class={className}>
+    {compact
+      ? (
+        <ul class='m-0 flex list-none items-center gap-2 p-0'>
+          {links.map((item) => (
+            <li>
+              <SmartLink
+                href={item.href}
+                class={[
+                  'text-xs font-semibold uppercase tracking-[0.08em] transition-colors',
+                  item.active ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-accent)]'
+                ].join(' ')}
+                aria-current={item.active ? 'page' : undefined}
+              >
+                {item.locale}
+              </SmartLink>
+            </li>
+          ))}
+        </ul>
+        )
+      : (
+        <>
+          <ul class='hidden list-none items-center gap-1 md:flex'>
+            {links.map((item) => (
+              <li>
+                <SmartLink
+                  href={item.href}
+                  class={[
+                    'inline-flex rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition-colors',
+                    item.active
+                      ? 'bg-[var(--color-accent)] text-white'
+                      : 'border border-[var(--color-border)] bg-white/80 text-[var(--color-text-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]'
+                  ].join(' ')}
+                  aria-current={item.active ? 'page' : undefined}
+                >
+                  {item.locale}
+                </SmartLink>
+              </li>
+            ))}
+          </ul>
+
+          <details class='relative md:hidden'>
+            <summary class='inline-flex cursor-pointer list-none rounded-full border border-[var(--color-border)] bg-white/85 px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text)]'>
+              {lang}
+            </summary>
+            <ul class='absolute right-0 z-20 mt-2 min-w-[7rem] list-none rounded-xl border border-[var(--color-border)] bg-white p-2 shadow-[var(--shadow-soft)]'>
+              {links.map((item) => (
+                <li>
+                  <SmartLink
+                    href={item.href}
+                    class={[
+                      'inline-flex w-full rounded-md px-2 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] transition-colors',
+                      item.active ? 'bg-[var(--color-bg-alt)] text-[var(--color-accent)]' : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-alt)] hover:text-[var(--color-accent)]'
+                    ].join(' ')}
+                    aria-current={item.active ? 'page' : undefined}
+                  >
+                    {item.locale}
+                  </SmartLink>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </>
+        )}
+  </nav>
+)}

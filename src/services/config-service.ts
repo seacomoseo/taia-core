@@ -385,6 +385,17 @@ export class ConfigService {
         ...getSchemaFields(col.schemaType),
         { name: 'body', label: 'body', widget: 'markdown', i18n: true }
       ]
+      if (!this.hasSchemaDateField(col.schemaType)) {
+        fields.splice(1, 0, {
+          name: 'order',
+          label: 'order',
+          widget: 'number',
+          default: 0,
+          required: false,
+          hint: 'order',
+          i18n: 'duplicate'
+        })
+      }
       const layoutFields = this.getLayoutFields(col.layout)
       const mergedFields = this.mergeCmsFields(fields, layoutFields)
 
@@ -703,6 +714,11 @@ export class ConfigService {
       collections: data.collections || {},
       files: data.files || {}
     }
+  }
+
+  private hasSchemaDateField (schemaType?: string): boolean {
+    const fields = getSchemaFields((schemaType || 'WebPage') as any)
+    return fields.some((field) => field.widget === 'datetime' || /date/i.test(field.name))
   }
 
   private localizeCmsConfig (config: any, translations: CmsTranslations, cmsLocale: string): any {

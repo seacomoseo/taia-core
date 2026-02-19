@@ -72,6 +72,59 @@ const matchesSegments = (segments: string[], target: string[]) => {
   return segments.every((segment, index) => segment === target[index])
 }
 
+const isSinglesIndexEntry = (item: any) => {
+  const filePath = typeof item?.filePath === 'string' ? item.filePath : ''
+  const normalized = filePath.replace(/\\/g, '/')
+  return /(^|\/)content\/singles\/_index\.[a-zA-Z-]+\.mdx?$/.test(normalized)
+}
+
+const getSinglesCollectionItems = (items: any[], targetLang: string) => {
+  const orderMap = new Map<string, number>()
+  taiaConfig.singles.forEach((single, index) => {
+    orderMap.set(single.id.replace(/^_/, ''), index)
+  })
+
+  const filtered = items.filter((item: any) => {
+    if (!matchesLang(item, targetLang)) return false
+    if (isSinglesIndexEntry(item)) return false
+    return true
+  })
+
+  return filtered.sort((a: any, b: any) => {
+    const aBase = getEntryBase(a).replace(/^_/, '')
+    const bBase = getEntryBase(b).replace(/^_/, '')
+    const aOrder = orderMap.has(aBase) ? (orderMap.get(aBase) as number) : Number.MAX_SAFE_INTEGER
+    const bOrder = orderMap.has(bBase) ? (orderMap.get(bBase) as number) : Number.MAX_SAFE_INTEGER
+    if (aOrder !== bOrder) return aOrder - bOrder
+    return String(a?.data?.title || '').localeCompare(String(b?.data?.title || ''))
+  })
+}
+
+const hasDateField = (schemaType?: string) => {
+  return ['Article', 'BlogPosting', 'NewsArticle', 'Event'].includes(schemaType || '')
+}
+
+const dateValue = (item: any) => {
+  const raw = item?.data?.publishedAt || item?.data?.startDate || item?.data?.date || item?.data?.modifiedAt
+  const value = new Date(raw || 0).getTime()
+  return Number.isFinite(value) ? value : 0
+}
+
+const orderValue = (item: any) => {
+  return typeof item?.data?.order === 'number' ? item.data.order : 0
+}
+
+const sortCollectionItems = (items: any[], schemaType?: string) => {
+  if (hasDateField(schemaType)) {
+    return [...items].sort((a, b) => dateValue(b) - dateValue(a))
+  }
+  return [...items].sort((a, b) => {
+    const diff = orderValue(a) - orderValue(b)
+    if (diff !== 0) return diff
+    return String(a?.data?.title || '').localeCompare(String(b?.data?.title || ''))
+  })
+}
+
 const rawPath = Astro.params.path
 const segments = typeof rawPath === 'string' ? rawPath.split('/').filter(Boolean) : []
 let lang = defaultLang
@@ -100,7 +153,7 @@ if (segments.length === 0) {
   entry = findEntryByBase(singlesEntries, 'home', lang) || findEntryByBase(singlesEntries, '_home', lang)
   if (entry) {
     const singleConfig = taiaConfig.singles.find((item) => item.id.replace(/^_/, '') === 'home')
-    layout = singleConfig?.layout || 'default'
+    layout = singleConfig?.layout || entry.data?.layout || 'default'
     type = 'single'
   }
 }
@@ -118,7 +171,7 @@ for (const single of taiaConfig.singles) {
   }
 
   if (entry) {
-    layout = single.layout
+    layout = single.layout || entry.data?.layout || 'default'
     type = 'single'
     break
   }
@@ -136,8 +189,15 @@ if (!entry) {
     const { base } = splitSlug(entry.id || entry.slug)
     const normalizedBase = base.replace(/^_/, '')
     const singleConfig = taiaConfig.singles.find((item) => item.id.replace(/^_/, '') === normalizedBase)
-    layout = singleConfig?.layout || 'default'
-    type = 'single'
+    if (isSinglesIndexEntry(entry)) {
+      layout = 'collection'
+      collectionId = 'singles'
+      collectionItems = getSinglesCollectionItems(singlesEntries, lang)
+      type = 'collection'
+    } else {
+      layout = singleConfig?.layout || entry.data?.layout || 'default'
+      type = 'single'
+    }
   }
 }
 
@@ -149,16 +209,17 @@ if (!entry) {
 
     if (matchesSegments(segments, landingSegments)) {
       entry = findEntryByBase(entries, '_index', lang)
-      if (entry) {
-        layout = 'collection'
-        collectionId = col.id
-        collectionItems = entries.filter((item: any) => {
-          const { base } = splitSlug(item.id || item.slug)
-          return matchesLang(item, lang) && base !== '_index'
-        })
-        type = 'collection'
-        break
-      }
+        if (entry) {
+          layout = 'collection'
+          collectionId = col.id
+          const rawItems = entries.filter((item: any) => {
+            const { base } = splitSlug(item.id || item.slug)
+            return matchesLang(item, lang) && base !== '_index'
+          })
+          collectionItems = sortCollectionItems(rawItems, col.schemaType)
+          type = 'collection'
+          break
+        }
     }
 
     const prefix = configService.getCollectionPrefix(col, lang)

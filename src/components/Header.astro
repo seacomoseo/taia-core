@@ -1,0 +1,46 @@
+---
+import SmartLink from './SmartLink.astro'
+import LanguageSwitcher from './LanguageSwitcher.astro'
+import { ConfigService } from '../services/config-service'
+import { localizePath, t } from '../utils/i18n'
+
+interface Props {
+  lang?: string
+}
+
+const { lang = 'es' } = Astro.props as Props
+const configService = new ConfigService(process.cwd())
+const defaultLang = configService.getDefaultLanguage()
+const config = configService.getTaiaConfig()
+
+const siteName = config.siteName || 'TAIA'
+const nav = [
+  { label: t(lang, 'header.home', lang === 'en' ? 'Home' : 'Inicio'), href: '/' },
+  { label: t(lang, 'header.blog', 'Blog'), href: '/blog' },
+  { label: t(lang, 'header.shop', lang === 'en' ? 'Shop' : 'Tienda'), href: '/tienda' }
+]
+---
+
+<header class='sticky top-0 z-[90] border-b border-[var(--color-border)]/70 bg-[#f7f5ef]/90 backdrop-blur-xl'>
+  <div class='mx-auto flex max-w-[84rem] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10'>
+    <SmartLink href={localizePath('/', lang, defaultLang)} class='font-[Fraunces] text-xl tracking-tight text-[var(--color-bg-dark)]'>
+      {siteName}
+    </SmartLink>
+
+    <div class='flex items-center gap-2'>
+      <nav aria-label={t(lang, 'header.nav', lang === 'en' ? 'Main navigation' : 'Navegacion principal')}>
+        <ul class='m-0 flex list-none items-center gap-2 p-0'>
+          {nav.map((item) => (
+            <li>
+              <SmartLink href={localizePath(item.href, lang, defaultLang)} appearance='ghost' class='text-sm'>
+                {item.label}
+              </SmartLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <LanguageSwitcher lang={lang} />
+    </div>
+  </div>
+</header>

@@ -127,7 +127,6 @@ export default function taiaCore (_options: TaiaCoreOptions = {}): AstroIntegrat
         injectRoute({ pattern: '/llms.txt', entrypoint: './core/src/integration/endpoints/llms-txt.ts' })
         injectRoute({ pattern: '/_redirects', entrypoint: './core/src/integration/endpoints/redirects.ts' })
         injectRoute({ pattern: '/sitemap.xml', entrypoint: './core/src/integration/endpoints/sitemap-xml.ts' })
-        injectRoute({ pattern: '/sitemap', entrypoint: './core/src/integration/endpoints/sitemap-page.ts' })
 
         // Assets
         injectRoute({ pattern: '/uploads/[...path]', entrypoint: './core/src/integration/endpoints/uploads.ts' })
