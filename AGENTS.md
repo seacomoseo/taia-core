@@ -38,7 +38,7 @@ If instructions conflict, follow the higher level and document tradeoffs.
 
 - Site settings source: `../content/config.yml`.
 - Collections and singles are declared in `../content/config.yml`.
-- Collection routes use `../content/<collection>/_index.<lang>.md` with `path` and `slug`.
+- Collection routes use `../content/<collection>/_index.<lang>.md` with `entryPrefix` and `slug`.
 - Home page source: `../content/singles/_home.<lang>.md`.
 - CMS config endpoint: `/admin/config.yml`.
 - Collection metadata:

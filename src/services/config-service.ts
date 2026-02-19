@@ -161,8 +161,8 @@ export class ConfigService {
     const indexPath = path.join(this.projectRoot, folder, indexName)
 
     const frontmatter = this.readFrontmatter(indexPath)
-    if (frontmatter && Object.prototype.hasOwnProperty.call(frontmatter, 'path')) {
-      return this.normalizePathSegment(frontmatter.path || '')
+    if (frontmatter && Object.prototype.hasOwnProperty.call(frontmatter, 'entryPrefix')) {
+      return this.normalizePathSegment(frontmatter.entryPrefix || '')
     }
 
     return this.normalizePathSegment(col.id)
@@ -184,8 +184,8 @@ export class ConfigService {
         }
         return this.normalizePathSegment(rawSlug)
       }
-      if (Object.prototype.hasOwnProperty.call(frontmatter, 'path')) {
-        return this.normalizePathSegment(frontmatter.path || '')
+      if (Object.prototype.hasOwnProperty.call(frontmatter, 'entryPrefix')) {
+        return this.normalizePathSegment(frontmatter.entryPrefix || '')
       }
     }
 

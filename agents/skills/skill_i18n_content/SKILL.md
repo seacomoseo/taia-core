@@ -23,7 +23,7 @@ Define and maintain multilingual content and translatable UI strings.
 ### Step 1: Content Files
 
 - Ensure every content file is suffixed with `.<lang>.md`
-- Create `_index.<lang>.md` for each collection with `path` (no leading slash)
+- Create `_index.<lang>.md` for each collection with `entryPrefix` (no leading slash)
 - Default language uses no URL prefix; others use `/<lang>/`
 
 ### Step 2: UI Strings

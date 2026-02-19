@@ -77,3 +77,21 @@ Short traceability log for behavior changes inside `core/`.
   - `content/llms.txt`
 - Why: make design and routing behavior configurable from content/CMS with reusable defaults.
 - Follow-up: extend style model with spacing/radius/motion tokens and validate values.
+
+## 2026-02-19 - Collection entryPrefix contract and globals label localization
+
+- Change: replaced collection `_index` route prefix key from `path` to `entryPrefix` and improved CMS globals field labels using localized values from `content/globals/<lang>.yml`.
+- Impacted paths:
+  - `core/src/services/config-service.ts`
+  - `core/AGENTS.md`
+  - `core/agents/skills/skill_i18n_content/SKILL.md`
+- Why: avoid naming ambiguity and improve CMS authoring UX in multilingual projects.
+- Follow-up: optionally migrate single-page route key naming in a future breaking release for full consistency.
+
+## 2026-02-19 - Reusable GitHub Actions workflow in core
+
+- Change: added reusable CI/deploy workflow in core and prepared pilot to consume it.
+- Impacted paths:
+  - `core/.github/workflows/astro-cloudflare-reusable.yml`
+- Why: centralize pipeline logic in core for easier maintenance across multiple projects.
+- Follow-up: version workflows with tags/SHAs in consumers and add release notes for workflow changes.
