@@ -49,7 +49,7 @@ export function renderSitemapTreeHtml (model: SitemapModel, labels?: { singles?:
       const children = group.children
         .map((child) => `<li>${renderNode(child)}</li>`)
         .join('')
-      return `<section>${heading}${children ? `<ul>${children}</ul>` : ''}</section>`
+      return `${heading}${children ? `<ul>${children}</ul>` : ''}`
     })
     .join('')
 
@@ -57,24 +57,6 @@ export function renderSitemapTreeHtml (model: SitemapModel, labels?: { singles?:
     ? `<h2>${renderNode(model.singlesIndex)}</h2>`
     : `<h2>${escapeHtml(labels?.singles || 'Pages')}</h2>`
   return `${singlesHeading}<ul>${singles}</ul>${groups}`
-}
-
-export function renderSinglesTreeHtml (model: SitemapModel, labels?: { singles?: string }): string {
-  const renderNode = (node: SitemapNode): string => {
-    if (!node.noindex) return `<a href="${escapeHtml(node.path)}">${escapeHtml(node.title)}</a>`
-    const payload = Buffer.from(node.path).toString('base64').split('').reverse().join('')
-    return `<a data-obf="${payload}">${escapeHtml(node.title)}</a>`
-  }
-
-  const heading = model.singlesIndex
-    ? `<h2>${renderNode(model.singlesIndex)}</h2>`
-    : `<h2>${escapeHtml(labels?.singles || 'Pages')}</h2>`
-
-  const items = model.singles
-    .map((node) => `<li>${renderNode(node)}</li>`)
-    .join('')
-
-  return `${heading}<ul>${items}</ul>`
 }
 
 export class SitemapService {

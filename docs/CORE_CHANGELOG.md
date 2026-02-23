@@ -186,3 +186,12 @@ Short traceability log for behavior changes inside `core/`.
   - `core/src/services/sitemap-service.ts`
 - Why: align sitemap output with indexable canonicals only and strengthen multilingual discovery with route-safe alternate mapping.
 - Follow-up: split into sitemap index files if URL volume grows near protocol limits.
+
+## 2026-02-22 - Sitemap shortcode cleanup and flatter group markup
+
+- Change: removed deprecated `{{singles_tree}}` shortcode handling and simplified `{{sitemap_tree}}` group output by removing per-group `<section>` wrappers.
+- Impacted paths:
+  - `core/src/markdown/remark-shortcodes.ts`
+  - `core/src/services/sitemap-service.ts`
+- Why: reduce dead shortcode surface and keep sitemap markdown output semantically simpler while preserving heading-based grouping.
+- Follow-up: none.

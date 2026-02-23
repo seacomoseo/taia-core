@@ -653,7 +653,14 @@ export class ConfigService {
               fields: [
                 { name: 'from', label: 'from', widget: 'string' },
                 { name: 'to', label: 'to', widget: 'string' },
-                { name: 'type', label: 'type', widget: 'number', default: 301, required: false }
+                {
+                  name: 'type',
+                  label: 'type',
+                  widget: 'select',
+                  default: 301,
+                  required: false,
+                  options: [301, 302, 303, 307, 308, 200]
+                }
               ]
             }
           ]
@@ -679,7 +686,14 @@ export class ConfigService {
           format: 'raw',
           editor: { preview: false },
           fields: [
-            { name: 'body', label: 'code', widget: 'code', output_code_only: true }
+            {
+              name: 'body',
+              label: 'code',
+              widget: 'code',
+              output_code_only: true,
+              default_language: 'markdown',
+              allow_language_selection: true
+            }
           ]
         }
       ]

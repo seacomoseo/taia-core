@@ -1,4 +1,4 @@
-import { SitemapService, renderSitemapTreeHtml, renderSinglesTreeHtml } from '../services/sitemap-service'
+import { SitemapService, renderSitemapTreeHtml } from '../services/sitemap-service'
 
 interface NodeLike {
   type?: string
@@ -98,14 +98,7 @@ export function createRemarkShortcodesPlugin (projectRoot: string) {
             const token = match[1]
             if (token === 'sitemap_tree') {
               const model = sitemapService.buildModel(lang)
-              const html = renderSitemapTreeHtml(model)
-              pieces.push({
-                type: 'html',
-                value: `${html}<script>(function(){if(window.__taiaSitemapObfInit)return;window.__taiaSitemapObfInit=true;document.addEventListener('click',function(event){var trigger=event.target&&event.target.closest?event.target.closest('[data-obf]'):null;if(!trigger)return;try{var value=atob((trigger.getAttribute('data-obf')||'').split('').reverse().join(''));if(!value)return;window.location.href=value}catch(e){}})})();</script>`
-              })
-            } else if (token === 'singles_tree') {
-              const model = sitemapService.buildModel(lang)
-              const html = renderSinglesTreeHtml(model)
+              const html = renderSitemapTreeHtml(model).replace(/<\/?section>/g, '')
               pieces.push({
                 type: 'html',
                 value: `${html}<script>(function(){if(window.__taiaSitemapObfInit)return;window.__taiaSitemapObfInit=true;document.addEventListener('click',function(event){var trigger=event.target&&event.target.closest?event.target.closest('[data-obf]'):null;if(!trigger)return;try{var value=atob((trigger.getAttribute('data-obf')||'').split('').reverse().join(''));if(!value)return;window.location.href=value}catch(e){}})})();</script>`
