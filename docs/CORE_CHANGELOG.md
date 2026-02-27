@@ -195,3 +195,22 @@ Short traceability log for behavior changes inside `core/`.
   - `core/src/services/sitemap-service.ts`
 - Why: reduce dead shortcode surface and keep sitemap markdown output semantically simpler while preserving heading-based grouping.
 - Follow-up: none.
+
+## 2026-02-22 - Playwright visual QA skill for targeted UI checks
+
+- Change: added a new reusable skill to run focused Playwright-based visual checks (responsive layouts, interaction states, clipping/overflow, and before/after evidence workflow).
+- Impacted paths:
+  - `core/agents/skills/skill_playwright_visual_checks/SKILL.md`
+  - `core/docs/CORE_CHANGELOG.md`
+- Why: standardize fast visual verification for frontend changes with repeatable viewport matrix and clear pass/fail reporting.
+- Follow-up: optionally add shared helper scripts under the skill folder for automatic overflow metrics and structured screenshot naming.
+
+## 2026-02-22 - Visual QA tooling policy (Playwright over Antigravity)
+
+- Change: formalized policy to use Playwright for visual QA screenshot checks and explicitly disallow Antigravity capture flows by default.
+- Impacted paths:
+  - `core/AGENTS.md`
+  - `core/agents/skills/skill_playwright_visual_checks/SKILL.md`
+  - `core/docs/CORE_CHANGELOG.md`
+- Why: keep visual verification deterministic and aligned with repo-local automation tooling.
+- Follow-up: none.

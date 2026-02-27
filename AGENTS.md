@@ -35,6 +35,11 @@ If instructions conflict, follow the higher level and document tradeoffs.
 - Avoid overengineering; prefer simple, reversible decisions.
 - Never add literal Markdown `#` headings in `content/**/*.md`; page H1 must come from frontmatter `title` and layout rendering.
 
+## Tooling Policy
+
+- For visual QA screenshot checks, use Playwright-based workflows.
+- Do not use Antigravity-based visual capture flows unless the user explicitly overrides this policy.
+
 ## Content and CMS Contract
 
 - Site settings source: `../content/config.yml`.
